@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+
+    <title>A deep dive into part-of-speech tagging using the Viterbi algorithm</title>
+    <meta name="HandheldFriendly" content="True" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link rel="stylesheet" type="text/css" href="https://cdn.freecodecamp.org/news-assets/prism-1-16-0/prism.min.css" />
+    <link rel="stylesheet" type="text/css"
+        href="https://cdn.freecodecamp.org/news-assets/prism-1-16-0/prism-unescaped-markup.css" />
+
+    <link href="https://fonts.googleapis.com/css?family=Lato:300,400,400i,700|Roboto+Mono:400,700" rel="stylesheet">
+
+    <link rel="stylesheet" type="text/css" href="/news/assets/built/screen.css?v=2df5dfcc25" />
+    <link rel="stylesheet" type="text/css" href="/news/assets/css/algolia-search.css?v=2df5dfcc25" />
+    
+    <script src="https://cdn.freecodecamp.org/news-assets/algolia/algoliasearch-3-33-0/algoliasearch.min.js"></script>
+    <script src="https://cdn.freecodecamp.org/news-assets/algolia/autocomplete-0-36-0/autocomplete.min.js"></script>
+
+    <script src="https://embed.runkit.com"></script>
+
+    <link rel="shortcut icon" href="/news/favicon.png" type="image/png" />
+    <link rel="canonical" href="https://www.freecodecamp.org/news/a-deep-dive-into-part-of-speech-tagging-using-viterbi-algorithm-17c8de32e8bc/" />
+    <meta name="referrer" content="no-referrer-when-downgrade" />
+    <link rel="amphtml" href="https://www.freecodecamp.org/news/a-deep-dive-into-part-of-speech-tagging-using-viterbi-algorithm-17c8de32e8bc/amp/" />
+    
+    <meta property="og:site_name" content="freeCodeCamp.org" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="A deep dive into part-of-speech tagging using the Viterbi algorithm" />
+    <meta property="og:description" content="by Sachin Malhotra
+
+A deep dive into part-of-speech tagging using the Viterbi algorithm
+by Sachin Malhotra [https://medium.com/@sachinmalhotra]  and Divya Godayal
+[https://medium.com/@divyagodayal]
+
+Source: 
+https://www.vocal.com/echo-cancellation/viterbi-algorithm-in-speech-enhancement-and-hmm/
+Welcome back, Caretaker!
+
+In case you’ve forgotten the problem
+[https://medium.freecodecamp.org/an-introduction-to-part-of-speech-tagging-and-the-hidden-markov-model-953d45338f24] 
+ we were trying to tac" />
+    <meta property="og:url" content="https://www.freecodecamp.org/news/a-deep-dive-into-part-of-speech-tagging-using-viterbi-algorithm-17c8de32e8bc/" />
+    <meta property="og:image" content="https://cdn-media-1.freecodecamp.org/images/1*x-5ZBtUvlD78BOMuMnMAbg.png" />
+    <meta property="article:published_time" content="2018-06-08T19:05:31.000Z" />
+    <meta property="article:modified_time" content="2018-05-30T09:34:36.000Z" />
+    <meta property="article:tag" content="Machine Learning" />
+    <meta property="article:tag" content="Algorithms" />
+    <meta property="article:tag" content="Technology" />
+    <meta property="article:tag" content="Tech" />
+    <meta property="article:tag" content="Programming" />
+    
+    <meta property="article:publisher" content="https://www.facebook.com/freecodecamp" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="A deep dive into part-of-speech tagging using the Viterbi algorithm" />
+    <meta name="twitter:description" content="by Sachin Malhotra
+
+A deep dive into part-of-speech tagging using the Viterbi algorithm
+by Sachin Malhotra [https://medium.com/@sachinmalhotra]  and Divya Godayal
+[https://medium.com/@divyagodayal]
+
+Source: 
+https://www.vocal.com/echo-cancellation/viterbi-algorithm-in-speech-enhancement-and-hmm/
+Welcome back, Caretaker!
+
+In case you’ve forgotten the problem
+[https://medium.freecodecamp.org/an-introduction-to-part-of-speech-tagging-and-the-hidden-markov-model-953d45338f24] 
+ we were trying to tac" />
+    <meta name="twitter:url" content="https://www.freecodecamp.org/news/a-deep-dive-into-part-of-speech-tagging-using-viterbi-algorithm-17c8de32e8bc/" />
+    <meta name="twitter:image" content="https://cdn-media-1.freecodecamp.org/images/1*x-5ZBtUvlD78BOMuMnMAbg.png" />
+    <meta name="twitter:label1" content="Written by" />
+    <meta name="twitter:data1" content="freeCodeCamp.org" />
+    <meta name="twitter:label2" content="Filed under" />
+    <meta name="twitter:data2" content="Machine Learning, Algorithms, Technology, Tech, Programming" />
+    <meta name="twitter:site" content="@freecodecamp" />
+    <meta property="og:image:width" content="800" />
+    <meta property="og:image:height" content="478" />
+    
+    <script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "publisher": {
+        "@type": "Organization",
+        "name": "freeCodeCamp.org",
+        "logo": {
+            "@type": "ImageObject",
+            "url": "https://www.freecodecamp.org/news/content/images/2019/11/fcc_primary_large_24X210.svg",
+            "width": 210,
+            "height": 24
+        }
+    },
+    "author": {
+        "@type": "Person",
+        "name": "freeCodeCamp.org",
+        "image": {
+            "@type": "ImageObject",
+            "url": "//www.gravatar.com/avatar/fcda43852608626fe46d7fd43145766e?s=250&d=mm&r=x",
+            "width": 250,
+            "height": 250
+        },
+        "url": "https://www.freecodecamp.org/news/author/freecodecamp/",
+        "sameAs": []
+    },
+    "headline": "A deep dive into part-of-speech tagging using the Viterbi algorithm",
+    "url": "https://www.freecodecamp.org/news/a-deep-dive-into-part-of-speech-tagging-using-viterbi-algorithm-17c8de32e8bc/",
+    "datePublished": "2018-06-08T19:05:31.000Z",
+    "dateModified": "2018-05-30T09:34:36.000Z",
+    "image": {
+        "@type": "ImageObject",
+        "url": "https://cdn-media-1.freecodecamp.org/images/1*x-5ZBtUvlD78BOMuMnMAbg.png",
+        "width": 800,
+        "height": 478
+    },
+    "keywords": "Machine Learning, Algorithms, Technology, Tech, Programming",
+    "description": "by Sachin Malhotra\n\nA deep dive into part-of-speech tagging using the Viterbi algorithm\nby Sachin Malhotra [https://medium.com/@sachinmalhotra]  and Divya Godayal\n[https://medium.com/@divyagodayal]\n\nSource: \nhttps://www.vocal.com/echo-cancellation/viterbi-algorithm-in-speech-enhancement-and-hmm/\nWelcome back, Caretaker!\n\nIn case you’ve forgotten the problem\n[https://medium.freecodecamp.org/an-introduction-to-part-of-speech-tagging-and-the-hidden-markov-model-953d45338f24] \n we were trying to tac",
+    "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://www.freecodecamp.org/news/"
+    }
+}
+    </script>
+
+    <meta name="generator" content="Ghost 2.25" />
+    <link rel="alternate" type="application/rss+xml" title="freeCodeCamp.org" href="https://www.freecodecamp.org/news/rss/" />
+    <script>
+  // Set up dataLayer with data if provided
+  window.dataLayer = window.dataLayer || [{ gaPropertyId: 'UA-55446531-20' }];
+
+  // Initialized GTM via gtag
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'UA-55446531-20');
+
+  // Configure and initialize GTM
+  (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+  'https://www.googletagmanager.com/gtm.js?id='+i+dl+'&gtm_cookies_win=x';f.parentNode.insertBefore(j,f);
+  })(window,document,'script','dataLayer', 'GTM-5D6RKKP');
+</script>
+
+<script>
+// For Runkit embeds
+document.addEventListener('DOMContentLoaded', function() {
+  (function() {
+    const runkitElements = document.querySelectorAll('.runkit-element');
+	  runkitElements.forEach(function(element) {
+      const source = element.innerHTML.replace(/&amp;/g, '&');
+      element.innerHTML = '';
+      RunKit.createNotebook({element, source});
+	  });
+  })();
+});
+</script>
+
+</head>
+
+<body class="post-template tag-machine-learning tag-algorithms tag-technology tag-tech tag-programming">
+
+    <div class="site-wrapper">
+        <nav class="site-nav nav-padding">
+    <div class="site-nav-left">
+        <form onsubmit="submitSearch()">
+  <div role="search" class="searchbox__wrapper">
+    <input type="search" placeholder="Search 5,000+ tutorials" id="search-input" />
+    <button type="submit" title="Submit your search query." class="ais-SearchBox-submit">
+      <svg class="ais-SearchBox-submitIcon" xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 40 40">
+        <path d="M26.804 29.01c-2.832 2.34-6.465 3.746-10.426 3.746C7.333 32.756 0 25.424 0 16.378 0 7.333 7.333 0 16.378 0c9.046 0 16.378 7.333 16.378 16.378 0 3.96-1.406 7.594-3.746 10.426l10.534 10.534c.607.607.61 1.59-.004 2.202-.61.61-1.597.61-2.202.004L26.804 29.01zm-10.426.627c7.323 0 13.26-5.936 13.26-13.26 0-7.32-5.937-13.257-13.26-13.257C9.056 3.12 3.12 9.056 3.12 16.378c0 7.323 5.936 13.26 13.258 13.26z" />
+      </svg>
+    </button>
+  </div>
+</form>
+
+<script>
+  const client = algoliasearch('QMJYL5WYTI', '4318af87aa3ce128708f1153556c6108');
+  const index = client.initIndex('news');
+  const screenWidth = window.screen.width;
+  const screenHeight = window.screen.height;
+  const hitsToRender = (screenWidth >= 767 && screenHeight >= 768) ? 8 : 5;
+  autocomplete('#search-input', { hint: false, debug: true }, [
+    {
+      source: autocomplete.sources.hits(index, { hitsPerPage: hitsToRender }),
+      debounce: 250,
+      templates: {
+        suggestion: (suggestion, result) => {
+          return `
+            <a href="${suggestion.url}">
+              <div class="algolia-result">
+                <span>${suggestion._highlightResult.title.value}</span>
+              </div>
+            </a>
+          `;
+        },
+        empty: (options) => {
+          return `
+            <div class="algolia-result">
+              No tutorials found
+            </div>
+          `;
+        },
+        footer: (query, result) => {
+          if (!query.isEmpty) {
+            return `
+              <hr/>
+              <a id="algolia-footer-selector" href="https://freecodecamp.org/news/search?query=${result.query}">
+                <div class="algolia-result algolia-footer">
+                  <span>See all results for ${result.query}</span>
+                </div>
+              </a>
+            `;
+          }
+        }
+      }
+    }
+  ]).on('autocomplete:selected', (event, suggestion, dataset, context) => {
+    // Set to hit URL if hit is selected by mouse click or enter key
+    hitSelected = suggestion.url;
+    // Do nothing on click, as the browser will already do it
+    if (context.selectionMethod === 'click') {
+      return;
+    }
+    // Change the page, for example, on other events
+    window.location.assign(suggestion.url);
+  });
+
+  // If no hits in the Autocomplete dropdown are highlighted,
+  // treat input like normal search bar
+  const input = document.getElementById('search-input');
+  let searchQuery, hitSelected;
+
+  // Get the value of the search bar after each key event
+  input.addEventListener('input', e => {
+    searchQuery = input.value;
+  });
+
+  input.addEventListener('keydown', e => {
+    if (event.key === 'Enter' && !hitSelected && searchQuery) {
+      window.location.assign(`https://freecodecamp.org/news/search?query=${searchQuery}`);
+    }
+  });
+
+  function submitSearch() {
+    event.preventDefault();
+    // Search for highlighted hit when search button
+    // is pressed to prevent redirecting to a previously
+    // highlighted one
+    hitSelected = document.getElementsByClassName('aa-cursor')[0];
+
+    if (hitSelected && searchQuery) {
+      const articleUrl = hitSelected.querySelector('a').href;
+      window.location.assign(articleUrl);
+    } else if (!hitSelected && searchQuery) {
+      window.location.assign(`https://freecodecamp.org/news/search?query=${searchQuery}`);
+    }
+  }
+</script>
+    </div>
+    <div class="site-nav-middle">
+        <a class="site-nav-logo" href="https://www.freecodecamp.org/news"><img src="/news/content/images/2019/11/fcc_primary_large_24X210.svg" alt="freeCodeCamp.org" /></a>
+    </div>
+    <div class="site-nav-right main-nav">
+        <div class="main-nav-group">
+            <ul class="nav" role="menu">
+    <li class="nav-news" role="menuitem"><a href="https://www.freecodecamp.org/news/">/news</a></li>
+    <li class="nav-forum" role="menuitem"><a href="https://www.freecodecamp.org/forum/">/forum</a></li>
+    <li class="nav-learn" role="menuitem"><a href="https://www.freecodecamp.org/learn/">/learn</a></li>
+</ul>
+
+        </div>
+    </div>
+    <button class="site-nav-right toggle-button-nav">
+        Menu
+    </button>
+</nav>
+
+
+        
+
+
+
+
+<main id="site-main" class="site-main outer">
+    <div class="inner">
+
+        <article class="post-full post tag-machine-learning tag-algorithms tag-technology tag-tech tag-programming ">
+
+            <header class="post-full-header">
+                <section class="post-full-meta">
+                    <time class="post-full-meta-date"
+                        datetime="2018-06-08">8 June 2018</time>
+                    <span class="date-divider">/</span>
+                    <a href="/news/tag/machine-learning/">
+                        #Machine Learning
+                    </a>
+                </section>
+                <h1 class="post-full-title">A deep dive into part-of-speech tagging using the Viterbi algorithm</h1>
+            </header>
+
+            <div class="post-full-author-header">
+
+
+            </div>
+
+            <figure class="post-full-image">
+                <img srcset="https://cdn-media-1.freecodecamp.org/images/1*x-5ZBtUvlD78BOMuMnMAbg.png 300w,
+                            https://cdn-media-1.freecodecamp.org/images/1*x-5ZBtUvlD78BOMuMnMAbg.png 600w,
+                            https://cdn-media-1.freecodecamp.org/images/1*x-5ZBtUvlD78BOMuMnMAbg.png 1000w,
+                            https://cdn-media-1.freecodecamp.org/images/1*x-5ZBtUvlD78BOMuMnMAbg.png 2000w" sizes="(max-width: 800px) 400px,
+                            (max-width: 1170px) 700px,
+                            1400px" src="https://cdn-media-1.freecodecamp.org/images/1*x-5ZBtUvlD78BOMuMnMAbg.png" alt="A deep dive into part-of-speech tagging using the Viterbi algorithm"
+                    onerror="this.style.display='none'" />
+            </figure>
+
+            <section class=" post-full-content">
+                <div class="post-content medium-migrated-article">
+                    <p>by Sachin Malhotra</p><h1 id="a-deep-dive-into-part-of-speech-tagging-using-the-viterbi-algorithm">A deep dive into part-of-speech tagging using the Viterbi algorithm</h1><p><em>by <a href="https://medium.com/@sachinmalhotra" rel="noopener">Sachin Malhotra</a> and <a href="https://medium.com/@divyagodayal" rel="noopener">Divya Godayal</a></em></p><!--kg-card-begin: image--><figure class="kg-card kg-image-card kg-card-hascaption"><img src="https://cdn-media-1.freecodecamp.org/images/0xW2T6PJWIqsqxhx40O2lZICrr5nUZR51wdt" class="kg-image"><figcaption>Source: <a href="https://www.vocal.com/echo-cancellation/viterbi-algorithm-in-speech-enhancement-and-hmm/" rel="noopener" target="_blank" title="">https://www.vocal.com/echo-cancellation/viterbi-algorithm-in-speech-enhancement-and-hmm/</a></figcaption></figure><!--kg-card-end: image--><p>Welcome back, Caretaker!</p><p>In case you’ve forgotten the <a href="https://medium.freecodecamp.org/an-introduction-to-part-of-speech-tagging-and-the-hidden-markov-model-953d45338f24" rel="noopener">problem</a> we were trying to tackle in the previous article, let us revise it for you.</p><p>So there’s this naughty kid Peter and he’s going to pester his new caretaker, you!</p><p>As a caretaker, one of the most important tasks for you is to tuck Peter in bed and make sure he is sound asleep. Once you’ve tucked him in, you want to make sure that he’s actually asleep and not up to some mischief.</p><p>You cannot, however, enter the room again, as that would surely wake Peter up. All you can hear are the noises that might come from the room.</p><p>Either the room is <strong>quiet</strong> or there is <strong>noise</strong> coming from the room. These are your observations.</p><p>All you have as the caretaker are:</p><ul><li>a set of observations, which is basically a sequence containing <strong>noise<em> </em></strong>or <strong>quiet</strong> over time, and</li><li>A state diagram provided by Peter’s mom — who happens to be a neurological scientist — that contains all the different sets of probabilities that you can use to solve the problem defined below.</li></ul><h3 id="the-problem">The problem</h3><p>Given the state diagram and a sequence of N observations over time, we need to tell the state of the baby at the current point in time. Mathematically, we have N observations over times <code>t0, t1, t2 .... tN</code> . We want to find out if Peter would be awake or asleep, or rather which state is more probable at time <code>tN+1</code> .</p><p>In case any of this seems like Greek to you, go read the <a href="https://medium.com/@divyagodayal/part-of-speech-tagging-hmms-part-1-953d45338f24" rel="noopener">previous article</a> to brush up on the Markov Chain Model, Hidden Markov Models, and Part of Speech Tagging.</p><!--kg-card-begin: image--><figure class="kg-card kg-image-card kg-card-hascaption"><img src="https://cdn-media-1.freecodecamp.org/images/RIOlv0lcV03Ol30xkYD-rr0vbLMrMEdJreAe" class="kg-image"><figcaption>The state diagram that Peter’s mom gave you before leaving.</figcaption></figure><!--kg-card-end: image--><p>In that <a href="https://medium.com/@divyagodayal/part-of-speech-tagging-hmms-part-1-953d45338f24" rel="noopener">previous article</a>, we had briefly modeled the problem of Part of Speech tagging using the Hidden Markov Model.</p><p>The problem of Peter being asleep or not is just an example problem taken up for a better understanding of some of the core concepts involved in these two articles. At the core, the articles deal with solving the Part of Speech tagging problem using the Hidden Markov Models.</p><p>So, before moving on to the <strong>Viterbi Algorithm</strong>, let’s first look at a much more detailed explanation of how the tagging problem can be modeled using HMMs.</p><h3 id="generative-models-and-the-noisy-channel-model">Generative Models and the Noisy Channel Model</h3><p>A lot of problems in Natural Language Processing are solved using a supervised learning approach.</p><p>Supervised problems in machine learning are defined as follows. We assume training examples <code>(x(1), y(1))</code>. . .<code>(x(m) , y(m))</code>, where each example consists of an input x(i) paired with a label y(i) . We use X to refer to the set of possible inputs, and Y to refer to the set of possible labels. Our task is to learn a function f : X → Y that maps any input x to a label f(x).</p><p>In tagging problems, each x(i) would be a sequence of words <code>X1 X2 X3 …. Xn(i)</code>, and each y(i) would be a sequence of tags <code>Y1 Y2 Y3 … Yn(i)</code>(we use n(i)to refer to the length of the i’th training example). X would refer to the set of all sequences x1 . . . xn, and Y would be the set of all tag sequences y1 . . . yn. Our task would be to learn a function f : X → Y that maps sentences to tag sequences.</p><p>An intuitive approach to get an estimate for this problem is to use conditional probabilities. <code>p(y | x)</code> which is the probability of the output y given an input x. The parameters of the model would be estimated using the training samples. Finally, given an unknown input <code>x</code> we would like to find</p><p><code>f(x) = arg max(p(y | x)) ∀y ∊ Y</code></p><p>This here is the conditional model to solve this generic problem given the training data. Another approach that is mostly adopted in machine learning and natural language processing is to use a <strong>generative model<em>.</em></strong></p><p>Rather than directly estimating the conditional distribution <code>p(y|x)</code>, in generative models we instead model the joint probability <code>p(x, y)</code> over all the (x, y) pairs.</p><p>We can further decompose the joint probability into simpler values using Bayes’ rule:</p><!--kg-card-begin: image--><figure class="kg-card kg-image-card"><img src="https://cdn-media-1.freecodecamp.org/images/YPoMzlM9CMykbU3qcdwDXf9yPpO43F7zl2Yc" class="kg-image"></figure><!--kg-card-end: image--><ul><li><code>p(y)</code> is the prior probability of any input belonging to the label y.</li><li><code>p(x | y)</code> is the conditional probability of input x given the label y.</li></ul><p>We can use this decomposition and the Bayes rule to determine the conditional probability.</p><!--kg-card-begin: image--><figure class="kg-card kg-image-card"><img src="https://cdn-media-1.freecodecamp.org/images/FIHhUBpd1JM7OxMMP6A20Vpipi8hJVIwOhOn" class="kg-image"></figure><!--kg-card-end: image--><p>Remember, we wanted to estimate the function</p><!--kg-card-begin: code--><pre><code>f(x) = arg max( p(y|x) ) ∀y ∊ Y</code></pre><!--kg-card-end: code--><!--kg-card-begin: code--><pre><code>f(x) = arg max( p(y) * p(x | y) )</code></pre><!--kg-card-end: code--><p>The reason we skipped the denominator here is because the probability <code>p(x)</code> remains the same no matter what the output label being considered. And so, from a computational perspective, it is treated as a <strong>normalization constant and is normally ignored.</strong></p><p>Models that decompose a joint probability into terms <code>p(y)</code> and <code>p(x|y) </code>are often called <strong>noisy-channel models</strong>. Intuitively, when we see a test example x, we assume that it has been generated in two steps:</p><ol><li>first, a label y has been chosen with probability p(y)</li><li>second, the example x has been generated from the distribution p(x|y). The model p(x|y) can be interpreted as a <strong>“channel” </strong>which takes a label y as its input, and corrupts it to produce x as its output.</li></ol><h3 id="generative-part-of-speech-tagging-model">Generative Part of Speech Tagging Model</h3><p>Let us assume a finite set of words V and a finite sequence of tags K. Then the set S will be the set of all sequence, tags pairs <code>&lt;x1, x2, x3 ... xn, y1, y2, y3, ..., </code>yn&gt; such that <code>n &gt;</code> 0 ∀x<code> ∊ V a</code>nd ∀y ∊ K .</p><p>A generative tagging model is then the one where</p><!--kg-card-begin: image--><figure class="kg-card kg-image-card"><img src="https://cdn-media-1.freecodecamp.org/images/baWhcBHFiwW1aPtPwNpMeM7PdxYfxIL9jBkF" class="kg-image"></figure><!--kg-card-end: image--><p>2.</p><!--kg-card-begin: image--><figure class="kg-card kg-image-card"><img src="https://cdn-media-1.freecodecamp.org/images/oDp5BDuHy8wCkLUiGoEATp9TsM9yCda0GbQy" class="kg-image"></figure><!--kg-card-end: image--><p>Given a generative tagging model, the function that we talked about earlier from input to output becomes</p><!--kg-card-begin: image--><figure class="kg-card kg-image-card"><img src="https://cdn-media-1.freecodecamp.org/images/hmF3FST1pwqbP5a3lRI9mTsIZOH-5ilqgMv8" class="kg-image"></figure><!--kg-card-end: image--><p>Thus for any given input sequence of words, the output is the highest probability tag sequence from the model. Having defined the generative model, we need to figure out three different things:</p><ol><li>How exactly do we define the generative model probability <code>p(&lt;x1, x2, x3 ... xn, y1, y2, y3, ..., y</code>n&gt;)</li><li>How do we estimate the parameters of the model, and</li><li>How do we efficiently calculate</li></ol><!--kg-card-begin: image--><figure class="kg-card kg-image-card"><img src="https://cdn-media-1.freecodecamp.org/images/uHq7WaF9wQkNmagfOqC2SM-S0dLGpJDCkC0X" class="kg-image"></figure><!--kg-card-end: image--><p>Let us look at how we can answer these three questions side by side, once for our example problem and then for the actual problem at hand: part of speech tagging.</p><h3 id="defining-the-generative-model">Defining the Generative Model</h3><p>Let us first look at how we can estimate the probability <code>p(x1 .. xn, y1 .. yn)</code> using the HMM.</p><p>We can have any N-gram HMM which considers events in the previous window of size N.</p><p>The formulas provided hereafter are corresponding to a <strong>Trigram </strong>Hidden Markov Model.</p><h4 id="trigram-hidden-markov-model">Trigram Hidden Markov Model</h4><p>A trigram Hidden Markov Model can be defined using</p><ul><li>A finite set of states.</li><li>A sequence of observations.</li><li>q(s|u, v)<br><strong>Transition probability</strong> defined as the probability of a state “s” appearing right after observing “u” and “v” in the sequence of observations.</li><li>e(x|s)<br><strong>Emission probability</strong> defined as the probability of making an observation x given that the state was s.</li></ul><p>Then, the generative model probability would be estimated as</p><!--kg-card-begin: image--><figure class="kg-card kg-image-card"><img src="https://cdn-media-1.freecodecamp.org/images/QXdufboQ1sB0ZSP3vta1yiteOpT47xDCy6xf" class="kg-image"></figure><!--kg-card-end: image--><p>As for the baby sleeping problem that we are considering, we will have only two possible states: that the baby is either awake or he is asleep. The caretaker can make only two observations over time. Either there is noise coming in from the room or the room is absolutely quiet. The sequence of observations and states can be represented as follows:</p><!--kg-card-begin: image--><figure class="kg-card kg-image-card kg-card-hascaption"><img src="https://cdn-media-1.freecodecamp.org/images/hRYCLfJnsmLORhZSejKBvp6lzz5AoAepQuNu" class="kg-image"><figcaption>Observations and States over time for the baby sleeping problem</figcaption></figure><!--kg-card-end: image--><p>Coming on to the part of speech tagging problem, the states would be represented by the actual tags assigned to the words. The words would be our observations. The reason we say that the tags are our states is because in a Hidden Markov Model, the states are always hidden and all we have are the set of observations that are visible to us. Along similar lines, the sequence of states and observations for the part of speech tagging problem would be</p><!--kg-card-begin: image--><figure class="kg-card kg-image-card kg-card-hascaption"><img src="https://cdn-media-1.freecodecamp.org/images/35SQfert2ZVmpA4biNBYbdh18x1E8CaxpfYI" class="kg-image"><figcaption>Observations and States over time for the POS tagging problem</figcaption></figure><!--kg-card-end: image--><h3 id="estimating-the-model-s-parameters">Estimating the model’s parameters</h3><p>We will assume that we have access to some training data. The training data consists of a set of examples where each example is a sequence consisting of the observations, every observation being associated with a state. Given this data, how do we estimate the parameters of the model?</p><p>Estimating the model’s parameters is done by reading various counts off of the training corpus we have, and then computing maximum likelihood estimates:</p><!--kg-card-begin: image--><figure class="kg-card kg-image-card kg-card-hascaption"><img src="https://cdn-media-1.freecodecamp.org/images/c9IK15ggYYCC2jj7xqv49szM4T9z865wOYZW" class="kg-image"><figcaption>Transition probability and Emission probability for a Trigram HMM</figcaption></figure><!--kg-card-end: image--><p>We already know that the first term represents transition probability and the second term represents the emission probability. Let us look at what the four different counts mean in the terms above.</p><ol><li><strong>c(u, v, s)</strong> represents the trigram count of states u, v and s. Meaning it represents the number of times the three states u, v and s occurred together in that order in the training corpus.</li><li><strong>c(u, v)</strong> following along similar lines as that of the trigram count, this is the bigram count of states u and v given the training corpus.</li><li><strong>c(s → x)</strong> is the number of times in the training set that the state s and observation x are paired with each other. And finally,</li><li><strong>c(s)</strong> is the prior probability of an observation being labelled as the state s.</li></ol><p>Let us look at a sample training set for the toy problem first and see the calculations for transition and emission probabilities using the same.</p><p>The BLUE markings represent the transition probability, and RED is for emission probability calculations.</p><p>Note that since the example problem only has two distinct states and two distinct observations, and given that the training set is very small, the calculations shown below for the example problem are using a <strong>bigram<em> </em></strong>HMM<strong><em> </em></strong>instead of a trigram HMM.</p><p>Peter’s mother was maintaining a record of observations and states. And thus she even provided you with a training corpus to help you get the transition and emission probabilities.</p><h4 id="transition-probability-example-">Transition Probability Example:</h4><!--kg-card-begin: image--><figure class="kg-card kg-image-card kg-card-hascaption"><img src="https://cdn-media-1.freecodecamp.org/images/RKqKpVSWRASp7UFYpk7Bp6pKnJGbK5gEpFCB" class="kg-image"><figcaption>Training Corpus</figcaption></figure><!--kg-card-end: image--><!--kg-card-begin: image--><figure class="kg-card kg-image-card kg-card-hascaption"><img src="https://cdn-media-1.freecodecamp.org/images/gs1MZiI98zSRoppmv3Qt4adg7QSLaHZhxO7b" class="kg-image"><figcaption>Calculations for Awake appearing after Awake</figcaption></figure><!--kg-card-end: image--><h4 id="emission-probability-example-">Emission Probability Example:</h4><!--kg-card-begin: image--><figure class="kg-card kg-image-card kg-card-hascaption"><img src="https://cdn-media-1.freecodecamp.org/images/AptxqtG6x4IV6wvGhVjoYNIkT51zcFq85TYL" class="kg-image"><figcaption>Training corpus</figcaption></figure><!--kg-card-end: image--><!--kg-card-begin: image--><figure class="kg-card kg-image-card kg-card-hascaption"><img src="https://cdn-media-1.freecodecamp.org/images/Aa3DVOy0-gbjaMqMRiBPUvOr5LOg3gDjX45J" class="kg-image"><figcaption>Calculations for observing ‘Quiet’ when the state is ‘Awake’</figcaption></figure><!--kg-card-end: image--><p>That was quite simple, since the training set was very small. Let us look at a sample training set for our actual problem of part of speech tagging. Here we can consider a trigram HMM, and we will show the calculations accordingly.</p><p>We will use the following sentences as a corpus of training data (the notation word/TAG means word tagged with a specific part-of-speech tag).</p><!--kg-card-begin: image--><figure class="kg-card kg-image-card"><img src="https://cdn-media-1.freecodecamp.org/images/fjB8BXYUF0A3PMGLF1Hwt2E4ueO0VwLfhea8" class="kg-image"></figure><!--kg-card-end: image--><p>The training set that we have is a tagged corpus of sentences. Every sentence consists of words tagged with their corresponding part of speech tags. eg:- eat/VB means that the word is “eat” and the part of speech tag in this sentence in this very context is “VB” i.e. Verb Phrase. Let us look at a sample calculation for transition probability and emission probability just like we saw for the baby sleeping problem.</p><h4 id="transition-probability"><strong>Transition Probability</strong></h4><p>Let’s say we want to calculate the transition probability q(IN | VB, NN). For this, we see how many times we see a trigram (VB,NN,IN) in the training corpus in that specific order. We then divide it by the total number of times we see the bigram (VB,NN) in the corpus.</p><h4 id="emission-probability"><strong>Emission Probability</strong></h4><p>Let’s say we want to find out the emission probability e(an | DT). For this, we see how many times the word “an” is tagged as “DT” in the corpus and divide it by the total number of times we see the tag “DT” in the corpus.</p><!--kg-card-begin: image--><figure class="kg-card kg-image-card"><img src="https://cdn-media-1.freecodecamp.org/images/wcnkQ4ipbUSMdUueW30dPf9i5KO-MNz5O4Ka" class="kg-image"></figure><!--kg-card-end: image--><p>So if you look at these calculations, it shows that calculating the model’s parameters is not computationally expensive. That is, we don’t have to do multiple passes over the training data to calculate these parameters. All we need are a bunch of different counts, and a single pass over the training corpus should provide us with that.</p><p>Let’s move on and look at the final step that we need to look at given a generative model. That step is efficiently calculating</p><!--kg-card-begin: image--><figure class="kg-card kg-image-card"><img src="https://cdn-media-1.freecodecamp.org/images/L5g6txDpMnwxRtLNPdYQpVdLSHr6wqX1Sa1l" class="kg-image"></figure><!--kg-card-end: image--><p>We will be looking at the famous Viterbi Algorithm for this calculation.</p><h3 id="finding-the-most-probable-sequence-viterbi-algorithm">Finding the most probable sequence — Viterbi Algorithm</h3><p>Finally, we are going to solve the problem of finding the most likely sequence of labels given a set of observations x1 … xn. That is, we are to find out</p><!--kg-card-begin: image--><figure class="kg-card kg-image-card"><img src="https://cdn-media-1.freecodecamp.org/images/FTsxJ83x3QI1X94coodh0ADunrNpdYMBX4rS" class="kg-image"></figure><!--kg-card-end: image--><p>The probability here is expressed in terms of the transition and emission probabilities that we learned how to calculate in the previous section of the article. Just to remind you, the formula for the probability of a sequence of labels given a sequence of observations over “n” time steps is</p><!--kg-card-begin: image--><figure class="kg-card kg-image-card"><img src="https://cdn-media-1.freecodecamp.org/images/-tn5T49bhdb4TugyAO4mwO3t1Wx3KlqWgF6T" class="kg-image"></figure><!--kg-card-end: image--><p>Before looking at an optimized algorithm to solve this problem, let us first look at a simple brute force approach to this problem. Basically, we need to find out the most probable label sequence given a set of observations out of a finite set of possible sequences of labels. Let’s look at the total possible number of sequences for a small example for our example problem and also for a part of speech tagging problem.</p><p>Say we have the following set of observations for the example problem.</p><!--kg-card-begin: code--><pre><code>Noise     Quiet     Noise</code></pre><!--kg-card-end: code--><p>We have two possible labels {Asleep and Awake}. Some of the possible sequence of labels for the observations above are:</p><!--kg-card-begin: code--><pre><code>Awake      Awake     Awake</code></pre><!--kg-card-end: code--><!--kg-card-begin: code--><pre><code>Awake      Awake     Asleep</code></pre><!--kg-card-end: code--><!--kg-card-begin: code--><pre><code>Awake      Asleep    Awake</code></pre><!--kg-card-end: code--><!--kg-card-begin: code--><pre><code>Awake      Asleep    Asleep</code></pre><!--kg-card-end: code--><p>In all we can have 2³ = 8 possible sequences. This might not seem like very many, but if we increase the number of observations over time, the number of sequences would increase exponentially. This is the case when we only had two possible labels. What if we have more? As is the case with part of speech tagging.</p><p>For example, consider the sentence</p><!--kg-card-begin: code--><pre><code>the dog barks</code></pre><!--kg-card-end: code--><p>and assuming that the set of possible tags are {D, N, V}, let us look at some of the possible tag sequences:</p><!--kg-card-begin: code--><pre><code>D     D     DD     D     ND     D     VD     N     DD     N     ND     N     V ... etc</code></pre><!--kg-card-end: code--><p>Here, we would have 3³ = 27 possible tag sequences. And as you can see, the sentence was extremely short and the number of tags weren’t very many. In practice, we can have sentences that might be much larger than just three words. Then the number of unique labels at our disposal would also be too high to follow this enumeration approach and find the best possible tag sequence this way.</p><p>So the exponential growth in the number of sequences implies that for any reasonable length sentence, the brute force approach would not work out as it would take too much time to execute.</p><p>Instead of this brute force approach, we will see that we can find the highest probable tag sequence efficiently using a dynamic programming algorithm known as the <strong>Viterbi Algorithm.</strong></p><p>Let us first define some terms that would be useful in defining the algorithm itself. We already know that the probability of a label sequence given a set of observations can be defined in terms of the transition probability and the emission probability. Mathematically, it is</p><!--kg-card-begin: image--><figure class="kg-card kg-image-card"><img src="https://cdn-media-1.freecodecamp.org/images/XLJtbWQh3n77eqrPauYh9Mme1rSGcXpukUc6" class="kg-image"></figure><!--kg-card-end: image--><p>Let us look at a truncated version of this which is</p><!--kg-card-begin: image--><figure class="kg-card kg-image-card"><img src="https://cdn-media-1.freecodecamp.org/images/Df1ie2E2jxAmM38UZ7UrartTKLYjfOcPXHcS" class="kg-image"></figure><!--kg-card-end: image--><p>and let us call this the cost of a sequence of length k.</p><p>So the definition of “r” is simply considering the first k terms off of the definition of probability where k ∊ {1..n} and for any label sequence y1…yk.</p><p>Next we have the set S(k, u, v) which is basically the set of all label sequences of length k that end with the bigram (u, v) i.e.</p><!--kg-card-begin: image--><figure class="kg-card kg-image-card"><img src="https://cdn-media-1.freecodecamp.org/images/HOOiuLM6Cyf0eesIiJjBzo1uNbCcxLjLAsqU" class="kg-image"></figure><!--kg-card-end: image--><p>Finally, we define the term π(k, u, v) which is basically the sequence with the maximum cost.</p><!--kg-card-begin: image--><figure class="kg-card kg-image-card"><img src="https://cdn-media-1.freecodecamp.org/images/L4CHoJ6epH9hjOrvEzbN3SpyCcudEkdnHlE6" class="kg-image"></figure><!--kg-card-end: image--><p>The main idea behind the Viterbi Algorithm is that we can calculate the values of the term π(k, u, v) efficiently in a recursive, memoized fashion. In order to define the algorithm recursively, let us look at the base cases for the recursion.</p><!--kg-card-begin: code--><pre><code>π(0, *, *) = 1</code></pre><!--kg-card-end: code--><!--kg-card-begin: code--><pre><code>π(0, u, v) = 0</code></pre><!--kg-card-end: code--><p>Since we are considering a trigram HMM, we would be considering all of the trigrams as a part of the execution of the Viterbi Algorithm.</p><p>Now, we can start the first trigram window from the first three words of the sentence but then the model would miss out on those trigrams where the first word or the first two words occurred independently. For that reason, we consider two special start symbols as <code>*</code> and so our sentence becomes</p><!--kg-card-begin: code--><pre><code>*    *    x1   x2   x3   ......         xn</code></pre><!--kg-card-end: code--><p>And the first trigram we consider then would be (*, *, x1) and the second one would be (*, x1, x2).</p><p>Now that we have all our terms in place, we can finally look at the recursive definition of the algorithm which is basically the heart of the algorithm.</p><!--kg-card-begin: image--><figure class="kg-card kg-image-card"><img src="https://cdn-media-1.freecodecamp.org/images/1onixt5VxC32oTxrUAF9MklN61N79VXLrfuL" class="kg-image"></figure><!--kg-card-end: image--><p>This definition is clearly recursive, because we are trying to calculate one π term and we are using another one with a lower value of k in the recurrence relation for it.</p><!--kg-card-begin: image--><figure class="kg-card kg-image-card"><img src="https://cdn-media-1.freecodecamp.org/images/RNHTlxO-aqNvguCPosqS0pkGoS1M1gA12iKy" class="kg-image"></figure><!--kg-card-end: image--><p>Every sequence would end with a special STOP symbol. For the trigram model, we would also have two special start symbols “*” in the beginning.</p><p>Have a look at the pseudo-code for the entire algorithm.</p><!--kg-card-begin: image--><figure class="kg-card kg-image-card"><img src="https://cdn-media-1.freecodecamp.org/images/7I6yqBEAw6BHPUbVMoT3ReqTFNQWjeAzw2rT" class="kg-image"></figure><!--kg-card-end: image--><p>The algorithm first fills in the π(k, u, v) values in using the recursive<br>definition. It then uses the identity described before to calculate the highest probability for any sequence.</p><p>The running time for the algorithm is O(n|K|³), hence it is linear in the length of the sequence, and cubic in the number of tags.</p><p>NOTE: We would be showing calculations for the baby sleeping problem and the part of speech tagging problem based off a <strong>bigram HMM only. </strong>The calculations for the trigram are left to the reader to do themselves. But the code that is attached at the end of this article is based on a trigram HMM. It’s just that the calculations are easier to explain and portray for the Viterbi algorithm when considering a bigram HMM instead of a trigram HMM.</p><p>Therefore, before showing the calculations for the Viterbi Algorithm, let us look at the recursive formula based on a bigram HMM.</p><!--kg-card-begin: image--><figure class="kg-card kg-image-card"><img src="https://cdn-media-1.freecodecamp.org/images/8oFED1zwh-vesv886QdRAf6OJPjpXHFED80v" class="kg-image"></figure><!--kg-card-end: image--><p>This one is extremely similar to the one we saw before for the trigram model, except that now we are only concerning ourselves with the current label and the one before, instead of two before. The complexity of the algorithm now becomes O(n|K|²).</p><h4 id="calculations-for-baby-sleeping-problem">Calculations for Baby Sleeping Problem</h4><p>Now that we have the recursive formula ready for the Viterbi Algorithm, let us see a sample calculation of the same firstly for the example problem that we had, that is, the baby sleeping problem, and then for the part of speech tagging version.</p><p>Note that when we are at this step, that is, the calculations for the Viterbi Algorithm to find the most likely tag sequence given a set of observations over a series of time steps, we assume that transition and emission probabilities have already been calculated from the given corpus. Let’s have a look at a sample of transition and emission probabilities for the baby sleeping problem that we would use for our calculations of the algorithm.</p><!--kg-card-begin: image--><figure class="kg-card kg-image-card"><img src="https://cdn-media-1.freecodecamp.org/images/rdYzTQzvmJsm-7XqqYuuOWsWk4eV-Y7ZdLD3" class="kg-image"></figure><!--kg-card-end: image--><p>The baby starts by being awake, and remains in the room for three time points, t1 . . . t3 (three iterations of the Markov chain). The observations are: quiet, quiet, noise. Have a look at the following diagram that shows the calculations for up to two time-steps. The complete diagram with all the final set of values will be shown afterwards.</p><!--kg-card-begin: image--><figure class="kg-card kg-image-card"><img src="https://cdn-media-1.freecodecamp.org/images/lUkTHXkAb3o6Qw-2bl4s5NRFtMncTRSREwGY" class="kg-image"></figure><!--kg-card-end: image--><p>We have not shown the calculations for the state of “asleep” at k = 2 and the calculations for k = 3 in the above diagram to keep things simple.</p><p>Now that we have all these calculations in place, we want to calculate the most likely sequence of states that the baby can be in over the different given time steps. So, for k = 2 and the state of Awake, we want to know the most likely state at k = 1 that transitioned to Awake at k = 2. (k = 2 represents a sequence of states of length 3 starting off from 0 and t = 2 would mean the state at time-step 2. We are given the state at t = 0 i.e. Awake).</p><!--kg-card-begin: image--><figure class="kg-card kg-image-card"><img src="https://cdn-media-1.freecodecamp.org/images/hV8XAZkdEJ-HENyJ9DBZgu0Vwm7u0lQWHWT2" class="kg-image"></figure><!--kg-card-end: image--><p>Clearly, if the state at time-step 2 was AWAKE, then the state at time-step 1 would have been AWAKE as well, as the calculations point out. So, the Viterbi Algorithm not only helps us find the π(k) values, that is the cost values for all the sequences using the concept of dynamic programming, but it also helps us to find the most likely tag sequence given a start state and a sequence of observations. The algorithm, along with the pseudo-code for storing the <strong>back-pointers<em> </em></strong>is given below.</p><!--kg-card-begin: image--><figure class="kg-card kg-image-card"><img src="https://cdn-media-1.freecodecamp.org/images/VqlLFmx7w4LC6rnzTzA3LgvUv0b2vf9F2txl" class="kg-image"></figure><!--kg-card-end: image--><h4 id="calculations-for-the-part-of-speech-tagging-problem">Calculations for the Part of Speech Tagging Problem</h4><p>Let us look at a slightly bigger corpus for the part of speech tagging and the corresponding Viterbi graph showing the calculations and back-pointers for the Viterbi Algorithm.</p><p>Here is the corpus that we will consider:</p><!--kg-card-begin: image--><figure class="kg-card kg-image-card"><img src="https://cdn-media-1.freecodecamp.org/images/Coevve7f9ffS700x33OV4OFAL0D8C1SW8l3y" class="kg-image"></figure><!--kg-card-end: image--><p>Now take a look at the transition probabilities calculated from this corpus.</p><!--kg-card-begin: image--><figure class="kg-card kg-image-card"><img src="https://cdn-media-1.freecodecamp.org/images/FLAyUOfUmBVGToY3jhS8GNlCC4Vwe7UD5JxF" class="kg-image"></figure><!--kg-card-end: image--><p>Here, q0 → VB represents the probability of a sentence starting off with the tag VB, that is the first word of a sentence being tagged as VB. Similarly, q0 → NN represents the probability of a sentence starting with the tag NN. Notice that out of 10 sentences in the corpus, 8 start with NN and 2 with VB and hence the corresponding transition probabilities.</p><p>As for the emission probabilities, ideally we should be looking at all the combinations of tags and words in the corpus. Since that would be too much, we will only consider emission probabilities for the sentence that would be used in the calculations for the Viterbi Algorithm.</p><!--kg-card-begin: code--><pre><code>Time flies like an arrow</code></pre><!--kg-card-end: code--><p>The emission probabilities for the sentence above are:</p><!--kg-card-begin: image--><figure class="kg-card kg-image-card"><img src="https://cdn-media-1.freecodecamp.org/images/NNBG1YsFT9KY4LgXojD-wlO5tkkc0akbifBP" class="kg-image"></figure><!--kg-card-end: image--><p>Finally, we are ready to see the calculations for the given sentence, transition probabilities, emission probabilities, and the given corpus.</p><!--kg-card-begin: image--><figure class="kg-card kg-image-card"><img src="https://cdn-media-1.freecodecamp.org/images/oHM8ZO9SqAQ3oXTd0GgQPsKVpzDRefYgAN2G" class="kg-image"></figure><!--kg-card-end: image--><p>So, is that all there is to the Viterbi Algorithm ?</p><p>Take a look at the example below.</p><p>The bucket below each word is filled with the possible tags seen next to the word in the training corpus. The given sentence can have the combinations of tags depending on which path we take. But there is a catch. Can you figure out what that is?</p><!--kg-card-begin: image--><figure class="kg-card kg-image-card kg-card-hascaption"><img src="https://cdn-media-1.freecodecamp.org/images/XsP3zTF1Jcy-t1s3jnlYGCjvieey08uA0PwV" class="kg-image"><figcaption>All combinations of sequence paths</figcaption></figure><!--kg-card-end: image--><p>Were you able to figure it out?</p><p>No??</p><p>Let me tell you what it is.</p><p>There might be some path in the computation graph for which we do not have a transition probability. So our algorithm can just discard that path and take the other path.</p><!--kg-card-begin: image--><figure class="kg-card kg-image-card"><img src="https://cdn-media-1.freecodecamp.org/images/WO2lchwGpds8OKBCsBIHuibwSEt7ZFJC81HN" class="kg-image"></figure><!--kg-card-end: image--><p>In the above diagram, we discard the path marked in red since we do not have q(VB|VB). The training corpus never has a <strong>VB</strong> followed by <strong>VB</strong>. So in the Viterbi calculations, we end up taking q(VB|VB) = 0. And if you’ve been following the algorithm along closely, you would find that a single 0 in the calculations would make the entire probability or the maximum cost for a sequence of tags / labels to be 0.</p><p>This however means that we are ignoring the combinations which are not seen in the training corpus.</p><p>Is that the right way to approach the real world examples?</p><p>Consider a small tweak in the above sentence.</p><!--kg-card-begin: image--><figure class="kg-card kg-image-card kg-card-hascaption"><img src="https://cdn-media-1.freecodecamp.org/images/rwKP4uok5cPSrHwrBw1nzB8D-fnVn2iKB95q" class="kg-image"><figcaption>Time flies like <strong>take</strong> arrow</figcaption></figure><!--kg-card-end: image--><p>In this sentence we do not have any alternative path. Even if we have Viterbi probability until we reach the word “like”, we cannot proceed further. Since both q(VB|VB) = 0 and q(VB|IN) = 0. What do we do now?</p><p>The corpus that we considered here was very small. Consider any reasonably sized corpus with a lot of words and we have a major problem of sparsity of data. Take a look below.</p><!--kg-card-begin: image--><figure class="kg-card kg-image-card kg-card-hascaption"><img src="https://cdn-media-1.freecodecamp.org/images/ckuxohKqg8EpJCrJ2yJXnAy3vn1woRsCor4P" class="kg-image"><figcaption>Source: <a href="http://www.cs.pomona.edu/~kim/CSC181S08/lectures/Lec6/Lec6.pdf" rel="noopener" target="_blank" title="">http://www.cs.pomona.edu/~kim/CSC181S08/lectures/Lec6/Lec6.pdf</a></figcaption></figure><!--kg-card-end: image--><p>That means that we can have a potential 68 billion bigrams but the number of words in the corpus are just under a billion. That is a huge number of zero transition probabilities to fill up. The problem of sparsity of data is even more elaborate in case we are considering trigrams.</p><p>To solve this problem of data sparsity, we resort to a solution called Smoothing.</p><h3 id="smoothing">Smoothing</h3><p>The idea behind Smoothing is just this:</p><ol><li><strong>Discount </strong>— the existing probability values somewhat and</li><li><strong>Reallocate </strong>— this probability to the zeroes</li></ol><p>In this way, we redistribute the non zero probability values to compensate for the unseen transition combinations. Let us consider a very simple type of smoothing technique known as Laplace Smoothing.</p><p>Laplace smoothing is also known as one count smoothing. You will understand exactly why it goes by that name in a moment. Let’s revise how the parameters for a trigram HMM model are calculated given a training corpus.</p><!--kg-card-begin: image--><figure class="kg-card kg-image-card"><img src="https://cdn-media-1.freecodecamp.org/images/ICpHbDq7uB06MmmV1dnZbbFOaiUJm1mEsYdq" class="kg-image"></figure><!--kg-card-end: image--><p>The possible values that can go wrong here are</p><ol><li><code>c(u, v, s)</code> is 0</li><li><code>c(u, v)</code> is 0</li><li>We get an unknown word in the test sentence, and we don’t have any training tags associated with it.</li></ol><p>All these can be solved via smoothing. So the Laplace smoothing counts would become</p><!--kg-card-begin: image--><figure class="kg-card kg-image-card"><img src="https://cdn-media-1.freecodecamp.org/images/xwUoAtAzIUaU0vQWKyaqBpZJHJ-B4AlxGs9J" class="kg-image"></figure><!--kg-card-end: image--><p>Here V is the total number of tags in our corpus and λ is basically a real value between 0 and 1. It acts like a discounting factor. A λ = 1 value would give us <strong>too much of a redistribution of values of probabilities. </strong>For example:</p><!--kg-card-begin: image--><figure class="kg-card kg-image-card"><img src="https://cdn-media-1.freecodecamp.org/images/PTWcfPCoCcpB4rRBO1HTHnUvcJf3SeUoIKne" class="kg-image"></figure><!--kg-card-end: image--><p>Too much of a weight is given to unseen trigrams for λ = 1 and that is why the above mentioned modified version of Laplace Smoothing is considered for all practical applications. The value of the discounting factor is to be varied from one application to another.</p><p>Note that λ = 1 would only create a problem if the vocabulary size is too large. For a smaller corpus, λ = 1 would give us a good performance to start off with.</p><p>A thing to note about Laplace Smoothing is that it is a uniform redistribution, that is, all the trigrams that were previously unseen would have equal probabilities. So, suppose we are given some data and we observe that</p><ul><li>Frequency of trigram &lt;gave, the, thing&gt; is zero</li><li>Frequency of trigram &lt;gave, the, think&gt; is also zero</li><li>Uniform distribution over unseen events means: <br>P(thing|gave, the) = P(think|gave, the)</li></ul><p>Does that reflect our knowledge about English use?<br>P(thing|gave, the) &gt; P(think|gave, the) ideally, but uniform distribution using Laplace smoothing will not consider this.</p><p>This means that millions of unseen trigrams in a huge corpus would have equal probabilities when they are being considered in our calculations. That is probably not the right thing to do. However, it is better than to consider the 0 probabilities which would lead to these trigrams and eventually some paths in the Viterbi graph getting completely ignored. But this still needs to be worked upon and made better.</p><p>There are, however, a lot of different types of smoothing techniques that improve upon the basic Laplace Smoothing technique and help overcome this problem of uniform distribution of probabilities. Some of these techniques are:</p><ul><li>Good-Turing estimate</li><li>Jelinek-Mercer smoothing (interpolation)</li><li>Katz smoothing (backoff)</li><li>Witten-Bell smoothing</li><li>Absolute discounting</li><li>Kneser-Ney smoothing</li></ul><p>To read more on these different types of smoothing techniques in more detail, refer to <a href="https://nlp.stanford.edu/~wcmac/papers/20050421-smoothing-tutorial.pdf" rel="noopener">this</a> tutorial. Which smoothing technique to choose highly depends upon the type of application at hand, the type of data being considered, and also on the size of the data set.</p><p>If you have been following along this lengthy article, then I must say</p><!--kg-card-begin: image--><figure class="kg-card kg-image-card kg-card-hascaption"><img src="https://cdn-media-1.freecodecamp.org/images/DQRTVyAtupCa8fq-19mLOv0j9j5CpF2EQBnZ" class="kg-image"><figcaption>Source: <a href="https://sebreg.deviantart.com/art/You-re-Kind-of-Awesome-289166787" rel="noopener" target="_blank" title="">https://sebreg.deviantart.com/art/You-re-Kind-of-Awesome-289166787</a></figcaption></figure><!--kg-card-end: image--><p>Let’s move on and look at a slight optimization that we can do to the Viterbi algorithm that can reduce the number of computations and that also makes sense for a lot of data sets out there.</p><p>Before that, however, look at the pseudo-code for the algorithm once again.</p><!--kg-card-begin: image--><figure class="kg-card kg-image-card"><img src="https://cdn-media-1.freecodecamp.org/images/rpYO5Tck74JJbbhHl8MBjVHTKmIAtR60c2Eu" class="kg-image"></figure><!--kg-card-end: image--><p>If we look closely, we can see that <strong>for every trigram of words, we are considering all possible set of tags. </strong>That is, if the number of tags are V, then we are considering |V|³ number of combinations for every trigram of the test sentence.</p><p>Ignore the trigram for now and just consider a single word. We would be considering all of the unique tags for a given word in the above mentioned algorithm. Consider a corpus where we have the word “kick” which is associated with only two tags, say {NN, VB} and the total number of unique tags in the training corpus are around 500 (it’s a huge corpus).</p><!--kg-card-begin: image--><figure class="kg-card kg-image-card"><img src="https://cdn-media-1.freecodecamp.org/images/PKSiOWrD0TuGlbX9jAD2HlUJio07lBWI2Cyh" class="kg-image"></figure><!--kg-card-end: image--><p>Now the problem here is apparent. We might end up assigning a tag that doesn’t make sense with the word under consideration, simply because the transition probability of the trigram ending at the tag was very high, like in the example shown above. Also, it would be computationally inefficient to consider all 500 tags for the word “kick” if it only ever occurs with two unique tags in the entire corpus.</p><p>So, the optimization we do is that for every word, instead of considering all the unique tags in the corpus, <strong>we just consider the tags that it occurred with in the corpus</strong>.</p><p>This would work because, for a reasonably large corpus, a given word would ideally occur with all the various set of tags with which it can occur (most of them at-least). Then it would be reasonable to simply consider just those tags for the Viterbi algorithm.</p><p>As far as the Viterbi decoding algorithm is concerned, the complexity still remains the same because we are always concerned with the worst case complexity. In the worst case, every word occurs with every unique tag in the corpus, and so the complexity remains at O(n|V|³) for the trigram model and O(n|V|²) for the bigram model.</p><p>For the recursive implementation of the code, please refer to</p><p><a href="https://github.com/DivyaGodayal/HMM-POS-Tagger" rel="noopener"><strong>DivyaGodayal/HMM-POS-Tagger</strong></a><br><a href="https://github.com/DivyaGodayal/HMM-POS-Tagger" rel="noopener"><em>HMM-POS-Tagger — An HMM based Part of Speech Tagger implementation using Laplace Smoothing and Trigram HMMs</em>github.com</a></p><p>The recursive implementation is done along with Laplace Smoothing.</p><p>For the iterative implementation, refer to</p><p><a href="https://github.com/edorado93/HMM-Part-of-Speech-Tagger" rel="noopener"><strong>edorado93/HMM-Part-of-Speech-Tagger</strong></a><br><a href="https://github.com/edorado93/HMM-Part-of-Speech-Tagger" rel="noopener"><em>HMM-Part-of-Speech-Tagger — An HMM based Part of Speech Tagger</em>github.com</a></p><p>This implementation is done with One-Count Smoothing technique which leads to better accuracy as compared to the Laplace Smoothing.</p><p>A lot of snapshots of formulas and calculations in the two articles are derived from <a href="http://1. http://www.cs.columbia.edu/~mcollins/courses/nlp2011/notes/hmms.pdf" rel="noopener">here</a>.</p><p>Do let us know how this blog post helped you, and point out the mistakes if you find some while reading the article in the comments section below. Also, please recommend (by clapping) and spread the love as much as possible for this post if you think this might be useful for someone.</p>
+                </div>
+                <hr />
+                <p class="social-row">
+
+    If this article was helpful,
+    <a class='cta-button' onclick="window.open(`https://twitter.com/intent/tweet?text=A%20deep%20dive%20into%20part-of-speech%20tagging%20using%20the%20Viterbi%20algorithm%0A%0Ahttps%3A%2F%2Fwww.freecodecamp.org%2Fnews%2Fa-deep-dive-into-part-of-speech-tagging-using-viterbi-algorithm-17c8de32e8bc%2F`, 'share-twitter', 'width=550,height=235' ); return false;">
+        tweet it.</a>
+</p>                
+<div class='learn-cta-row'>
+    <p>
+        Learn to code for free. freeCodeCamp's open source curriculum has helped more than 40,000 people get jobs as
+        developers. <a class='cta-button' href='https://www.freecodecamp.org/learn'>Get started</a>
+    </p>
+</div>            </section>
+
+
+
+        </article>
+    </div>
+</main>
+
+
+
+
+
+<aside class="read-next outer">
+    <div class="inner">
+        <div class="read-next-feed">
+            <article class="read-next-card" 
+                 style="background-image: url(/news/content/images/size/w600/2019/11/fcc_ghost_publication_cover.png)" 
+                >
+                <header class="read-next-card-header">
+                    <p class="read-next-card-header-sitetitle">Countinue reading about</p>
+                    <h3 class="read-next-card-header-title"><a href="/news/tag/machine-learning/">Machine Learning</a></h3>
+                </header>
+                <div class="read-next-card-content">
+                    <ul>
+                        <li><a href="/news/benchmarking-machine-learning-execution-speeds/">How to Benchmark Machine Learning Execution Speed</a></li>
+                        <li><a href="/news/from-high-school-english-teacher-to-software-engineer-at-a-machine-learning-company/">From high school English teacher to Software Engineer at a Machine Learning company (Podcast)</a></li>
+                        <li><a href="/news/building-a-neural-network-from-scratch/">How to build a Neural  Network from scratch</a></li>
+                    </ul>
+                </div>
+                <footer class="read-next-card-footer">
+                    <a href="/news/tag/machine-learning/">See all 225 posts
+                        →</a>
+                </footer>
+            </article>
+
+            <article
+    class="post-card post tag-machine-learning tag-technology tag-tech tag-algorithms tag-programming ">
+
+    <a class="post-card-image-link" href="/news/an-introduction-to-part-of-speech-tagging-and-the-hidden-markov-model-953d45338f24/">
+        <img class="post-card-image" srcset="https://cdn-media-1.freecodecamp.org/images/1*f6e0uf5PX17pTceYU4rbCA.jpeg 300w,
+                    https://cdn-media-1.freecodecamp.org/images/1*f6e0uf5PX17pTceYU4rbCA.jpeg 600w,
+                    https://cdn-media-1.freecodecamp.org/images/1*f6e0uf5PX17pTceYU4rbCA.jpeg 1000w,
+                    https://cdn-media-1.freecodecamp.org/images/1*f6e0uf5PX17pTceYU4rbCA.jpeg 2000w" sizes="(max-width: 1000px) 400px, 700px"
+            onerror="this.style.display='none'" src="https://cdn-media-1.freecodecamp.org/images/1*f6e0uf5PX17pTceYU4rbCA.jpeg" alt="An introduction to part-of-speech tagging and the Hidden Markov Model" />
+    </a>
+
+    <div class="post-card-content">
+
+        <div class="post-card-content-link">
+
+            <header class="post-card-header">
+                <span class="post-card-tags">
+                    <a href="/news/tag/machine-learning/">
+                        #Machine Learning
+                    </a>
+                </span>
+                <h2 class="post-card-title">
+                    <a href="/news/an-introduction-to-part-of-speech-tagging-and-the-hidden-markov-model-953d45338f24/">
+                        An introduction to part-of-speech tagging and the Hidden Markov Model
+                    </a>
+                </h2>
+            </header>
+
+        </div>
+
+
+        <footer class="post-card-meta">
+
+            <time class="meta-item-single">2 years ago</time>
+
+
+        </footer>
+
+    </div>
+
+</article>
+            <article
+    class="post-card post tag-apps-tag tag-ios tag-ios-app-development tag-tech tag-programming ">
+
+    <a class="post-card-image-link" href="/news/how-to-get-featured-on-the-app-store-c056e62a7e7a/">
+        <img class="post-card-image" srcset="https://cdn-media-1.freecodecamp.org/images/1*0q5tzOOEFxCQeUxB4GbAKw.jpeg 300w,
+                    https://cdn-media-1.freecodecamp.org/images/1*0q5tzOOEFxCQeUxB4GbAKw.jpeg 600w,
+                    https://cdn-media-1.freecodecamp.org/images/1*0q5tzOOEFxCQeUxB4GbAKw.jpeg 1000w,
+                    https://cdn-media-1.freecodecamp.org/images/1*0q5tzOOEFxCQeUxB4GbAKw.jpeg 2000w" sizes="(max-width: 1000px) 400px, 700px"
+            onerror="this.style.display='none'" src="https://cdn-media-1.freecodecamp.org/images/1*0q5tzOOEFxCQeUxB4GbAKw.jpeg" alt="How to get your app featured on the App Store" />
+    </a>
+
+    <div class="post-card-content">
+
+        <div class="post-card-content-link">
+
+            <header class="post-card-header">
+                <span class="post-card-tags">
+                    <a href="/news/tag/apps-tag/">
+                        #Apps
+                    </a>
+                </span>
+                <h2 class="post-card-title">
+                    <a href="/news/how-to-get-featured-on-the-app-store-c056e62a7e7a/">
+                        How to get your app featured on the App Store
+                    </a>
+                </h2>
+            </header>
+
+        </div>
+
+
+        <footer class="post-card-meta">
+
+            <time class="meta-item-single">2 years ago</time>
+
+
+        </footer>
+
+    </div>
+
+</article>
+        </div>
+    </div>
+</aside>
+
+
+
+
+        <footer class="site-footer">
+    <div class="footer-container">
+        <div class="footer-row">
+            <div class="footer-desc-col">
+                <p>freeCodeCamp is a donor-supported tax-exempt 501(c)(3) nonprofit organization (United States Federal
+                    Tax Identification Number: 82-0779546)
+                </p>
+                <p>
+                    Our mission: to help people learn to code for free. We accomplish this by creating thousands of
+                    videos, articles, and interactive coding lessons - all freely available to the public. We also have
+                    thousands of freeCodeCamp study groups around the world.
+                </p>
+                <p>
+                    Donations to freeCodeCamp go toward our education initiatives, and help pay for servers, services,
+                    and staff.
+                </p>
+                <p class="footer-donation">
+                    You can&nbsp;<a href="https://freecodecamp.org/donate" class="inline" rel="noopener noreferrer"
+                        target="_blank">make a tax-deductible donation here</a>.
+                </p>
+            </div>
+            <div class="footer-col-1 our-nonprofit">
+                <div class="col-header">Our Nonprofit</div>
+                <a href="https://www.freecodecamp.org/news/about/">About</a>
+                <a href="https://www.linkedin.com/school/free-code-camp/people/" rel="noopener noreferrer"
+                    target="_blank">Alumni Network</a>
+                <a href="https://github.com/freeCodeCamp/">Open Source</a>
+                <a href="https://www.freecodecamp.org/shop/" rel="noopener noreferrer" target="_blank">Shop</a>
+                <a href="https://www.freecodecamp.org/news/support/">Support</a>
+                <a href="https://www.freecodecamp.org/news/sponsors/">Sponsors</a>
+                <a href="https://www.freecodecamp.org/news/academic-honesty-policy/">Academic Honesty</a>
+                <a href="https://www.freecodecamp.org/news/code-of-conduct/">Code of Conduct</a>
+                <a href="https://www.freecodecamp.org/news/privacy-policy/">Privacy Policy</a>
+                <a href="https://www.freecodecamp.org/news/terms-of-service/">Terms of Service</a>
+                <a href="https://www.freecodecamp.org/news/copyright-policy/">Copyright Policy</a>
+            </div>
+            <div class="footer-col-2 trending-guides">
+                <div class="col-header">Trending Guides</div>
+                <a href="https://www.freecodecamp.org/news/2019-web-developer-roadmap/">2019 Web Developer Roadmap</a>
+                <a href="https://www.freecodecamp.org/news/best-python-tutorial/">Python Tutorial</a>
+                <a
+                    href="https://www.freecodecamp.org/news/understanding-flexbox-everything-you-need-to-know-b4013d4dc9af/">CSS
+                    Flexbox Guide</a>
+                <a href="https://www.freecodecamp.org/news/best-javascript-tutorial/">JavaScript Tutorial</a>
+                <a href="https://www.freecodecamp.org/news/python-example/">Python Example </a>
+                <a href="https://www.freecodecamp.org/news/best-html-html5-tutorial/">HTML Tutorial</a>
+                <a href="https://www.freecodecamp.org/news/linux-command-line-bash-tutorial/">Linux Command Line
+                    Guide</a>
+                <a href="https://www.freecodecamp.org/news/javascript-example/">JavaScript Example</a>
+                <a href="https://www.freecodecamp.org/news/best-git-tutorial/">Git Tutorial</a>
+                <a href="https://www.freecodecamp.org/news/best-react-javascript-tutorial/">React Tutorial</a>
+                <a href="https://www.freecodecamp.org/news/best-java-8-tutorial/">Java Tutorial</a>
+
+            </div>
+            <div class="footer-col-3">
+                <div class="col-spacer"></div>
+                <a href="https://www.freecodecamp.org/news/the-best-linux-tutorials/">Linux Tutorial</a>
+                <a href="https://www.freecodecamp.org/news/best-css-and-css3-tutorial/">CSS Tutorial</a>
+                <a href="https://www.freecodecamp.org/news/the-best-jquery-examples/">jQuery Example</a>
+                <a href="https://www.freecodecamp.org/news/best-sql-database-tutorial/">SQL Tutorial</a>
+                <a href="https://www.freecodecamp.org/news/css-example-css3/">CSS Example</a>
+                <a href="https://www.freecodecamp.org/news/react-examples-reactjs/">React Example</a>
+                <a href="https://www.freecodecamp.org/news/best-angular-tutorial-angularjs/">Angular Tutorial</a>
+                <a href="https://www.freecodecamp.org/news/the-best-bootstrap-examples/">Bootstrap Example</a>
+                <a href="https://www.freecodecamp.org/news/the-ultimate-guide-to-ssh-setting-up-ssh-keys/">How to Set Up
+                    SSH Keys</a>
+                <a href="https://www.freecodecamp.org/news/best-wordpress-tutorial/">WordPress Tutorial</a>
+                <a href="https://www.freecodecamp.org/news/the-best-php-examples/">PHP Example</a>
+
+            </div>
+        </div>
+    </div>
+</footer>
+    </div>
+
+
+    <script>
+        var images = document.querySelectorAll('.kg-gallery-image img');
+        images.forEach(function (image) {
+            var container = image.closest('.kg-gallery-image');
+            var width = image.attributes.width.value;
+            var height = image.attributes.height.value;
+            var ratio = width / height;
+            container.style.flex = ratio + ' 1 0%';
+        })
+    </script>
+
+
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"
+        integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous">
+        </script>
+    <script type="text/javascript" src="/news/assets/built/jquery.fitvids.js?v=2df5dfcc25"></script>
+
+    <script type="text/javascript" src="https://cdn.freecodecamp.org/news-assets/prism-1-16-0/prism.min.js"></script>
+    <script type="text/javascript"
+        src="https://cdn.freecodecamp.org/news-assets/prism-1-16-0/prism-unescaped-markup.min.js"></script>
+    <script type="text/javascript"
+        src="https://cdn.freecodecamp.org/news-assets/prism-1-16-0/prism-markup-templating.min.js"></script>
+    <script type="text/javascript"
+        src="https://cdn.freecodecamp.org/news-assets/prism-1-16-0/prism-bash.min.js"></script>
+    <script type="text/javascript" src="https://cdn.freecodecamp.org/news-assets/prism-1-16-0/prism-c.min.js"></script>
+    <script type="text/javascript"
+        src="https://cdn.freecodecamp.org/news-assets/prism-1-16-0/prism-clojure.min.js"></script>
+    <script type="text/javascript"
+        src="https://cdn.freecodecamp.org/news-assets/prism-1-16-0/prism-cpp.min.js"></script>
+    <script type="text/javascript"
+        src="https://cdn.freecodecamp.org/news-assets/prism-1-16-0/prism-csharp.min.js"></script>
+    <script type="text/javascript"
+        src="https://cdn.freecodecamp.org/news-assets/prism-1-16-0/prism-css.min.js"></script>
+    <script type="text/javascript"
+        src="https://cdn.freecodecamp.org/news-assets/prism-1-16-0/prism-docker.min.js"></script>
+    <script type="text/javascript"
+        src="https://cdn.freecodecamp.org/news-assets/prism-1-16-0/prism-elixir.min.js"></script>
+    <script type="text/javascript"
+        src="https://cdn.freecodecamp.org/news-assets/prism-1-16-0/prism-erlang.min.js"></script>
+    <script type="text/javascript"
+        src="https://cdn.freecodecamp.org/news-assets/prism-1-16-0/prism-git.min.js"></script>
+    <script type="text/javascript" src="https://cdn.freecodecamp.org/news-assets/prism-1-16-0/prism-go.min.js"></script>
+    <script type="text/javascript"
+        src="https://cdn.freecodecamp.org/news-assets/prism-1-16-0/prism-graphql.min.js"></script>
+    <script type="text/javascript"
+        src="https://cdn.freecodecamp.org/news-assets/prism-1-16-0/prism-haskell.min.js"></script>
+    <script type="text/javascript"
+        src="https://cdn.freecodecamp.org/news-assets/prism-1-16-0/prism-java.min.js"></script>
+    <script type="text/javascript"
+        src="https://cdn.freecodecamp.org/news-assets/prism-1-16-0/prism-javascript.min.js"></script>
+    <script type="text/javascript"
+        src="https://cdn.freecodecamp.org/news-assets/prism-1-16-0/prism-json.min.js"></script>
+    <script type="text/javascript"
+        src="https://cdn.freecodecamp.org/news-assets/prism-1-16-0/prism-jsx.min.js"></script>
+    <script type="text/javascript"
+        src="https://cdn.freecodecamp.org/news-assets/prism-1-16-0/prism-kotlin.min.js"></script>
+    <script type="text/javascript"
+        src="https://cdn.freecodecamp.org/news-assets/prism-1-16-0/prism-lua.min.js"></script>
+    <script type="text/javascript"
+        src="https://cdn.freecodecamp.org/news-assets/prism-1-16-0/prism-markup.min.js"></script>
+    <script type="text/javascript"
+        src="https://cdn.freecodecamp.org/news-assets/prism-1-16-0/prism-php.min.js"></script>
+    <script type="text/javascript"
+        src="https://cdn.freecodecamp.org/news-assets/prism-1-16-0/prism-python.min.js"></script>
+    <script type="text/javascript" src="https://cdn.freecodecamp.org/news-assets/prism-1-16-0/prism-r.min.js"></script>
+    <script type="text/javascript"
+        src="https://cdn.freecodecamp.org/news-assets/prism-1-16-0/prism-ruby.min.js"></script>
+    <script type="text/javascript"
+        src="https://cdn.freecodecamp.org/news-assets/prism-1-16-0/prism-rust.min.js"></script>
+    <script type="text/javascript"
+        src="https://cdn.freecodecamp.org/news-assets/prism-1-16-0/prism-scala.min.js"></script>
+    <script type="text/javascript"
+        src="https://cdn.freecodecamp.org/news-assets/prism-1-16-0/prism-sql.min.js"></script>
+    <script type="text/javascript"
+        src="https://cdn.freecodecamp.org/news-assets/prism-1-16-0/prism-swift.min.js"></script>
+    <script type="text/javascript"
+        src="https://cdn.freecodecamp.org/news-assets/prism-1-16-0/prism-typescript.min.js"></script>
+    <script type="text/javascript"
+        src="https://cdn.freecodecamp.org/news-assets/prism-1-16-0/prism-yaml.min.js"></script>
+
+    <script>
+    $(document).ready(function () {
+        // Start fitVids
+        var $postContent = $(".post-full-content");
+        $postContent.fitVids();
+        // End fitVids
+    });
+</script>
+
+<script>
+    $(document).ready(function () {
+        $(".toggle-button-nav").click(function () {
+            $(".nav").toggleClass("show-main-nav-items");
+            $(".site-nav").toggleClass("expand-nav");
+            $(".toggle-button-nav").toggleClass("reverse-toggle-color");
+            $(".site-nav-left").toggleClass("display-search");
+        });
+    });
+</script>
+
+
+    <!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-5D6RKKP"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+
+</body>
+
+</html>

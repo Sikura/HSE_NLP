@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+
+    <title>An introduction to part-of-speech tagging and the Hidden Markov Model</title>
+    <meta name="HandheldFriendly" content="True" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link rel="stylesheet" type="text/css" href="https://cdn.freecodecamp.org/news-assets/prism-1-16-0/prism.min.css" />
+    <link rel="stylesheet" type="text/css"
+        href="https://cdn.freecodecamp.org/news-assets/prism-1-16-0/prism-unescaped-markup.css" />
+
+    <link href="https://fonts.googleapis.com/css?family=Lato:300,400,400i,700|Roboto+Mono:400,700" rel="stylesheet">
+
+    <link rel="stylesheet" type="text/css" href="/news/assets/built/screen.css?v=2df5dfcc25" />
+    <link rel="stylesheet" type="text/css" href="/news/assets/css/algolia-search.css?v=2df5dfcc25" />
+    
+    <script src="https://cdn.freecodecamp.org/news-assets/algolia/algoliasearch-3-33-0/algoliasearch.min.js"></script>
+    <script src="https://cdn.freecodecamp.org/news-assets/algolia/autocomplete-0-36-0/autocomplete.min.js"></script>
+
+    <script src="https://embed.runkit.com"></script>
+
+    <link rel="shortcut icon" href="/news/favicon.png" type="image/png" />
+    <link rel="canonical" href="https://www.freecodecamp.org/news/an-introduction-to-part-of-speech-tagging-and-the-hidden-markov-model-953d45338f24/" />
+    <meta name="referrer" content="no-referrer-when-downgrade" />
+    <link rel="amphtml" href="https://www.freecodecamp.org/news/an-introduction-to-part-of-speech-tagging-and-the-hidden-markov-model-953d45338f24/amp/" />
+    
+    <meta property="og:site_name" content="freeCodeCamp.org" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="An introduction to part-of-speech tagging and the Hidden Markov Model" />
+    <meta property="og:description" content="by Divya Godayal
+
+An introduction to part-of-speech tagging and the Hidden Markov Model
+by Sachin Malhotra [https://medium.com/@sachinmalhotra]  and Divya Godayal
+[https://medium.com/@divyagodayal]
+
+Source: 
+https://english.stackexchange.com/questions/218058/parts-of-speech-and-functions-bob-made-a-book-collector-happy-the-other-day
+Let’s go back into the times when we had no language to communicate. The only
+way we had was sign language. That’s how we usually communicate with our dog at
+home, r" />
+    <meta property="og:url" content="https://www.freecodecamp.org/news/an-introduction-to-part-of-speech-tagging-and-the-hidden-markov-model-953d45338f24/" />
+    <meta property="og:image" content="https://cdn-media-1.freecodecamp.org/images/1*f6e0uf5PX17pTceYU4rbCA.jpeg" />
+    <meta property="article:published_time" content="2018-06-08T19:31:14.000Z" />
+    <meta property="article:modified_time" content="2018-03-23T02:37:43.000Z" />
+    <meta property="article:tag" content="Machine Learning" />
+    <meta property="article:tag" content="Technology" />
+    <meta property="article:tag" content="Tech" />
+    <meta property="article:tag" content="Algorithms" />
+    <meta property="article:tag" content="Programming" />
+    
+    <meta property="article:publisher" content="https://www.facebook.com/freecodecamp" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="An introduction to part-of-speech tagging and the Hidden Markov Model" />
+    <meta name="twitter:description" content="by Divya Godayal
+
+An introduction to part-of-speech tagging and the Hidden Markov Model
+by Sachin Malhotra [https://medium.com/@sachinmalhotra]  and Divya Godayal
+[https://medium.com/@divyagodayal]
+
+Source: 
+https://english.stackexchange.com/questions/218058/parts-of-speech-and-functions-bob-made-a-book-collector-happy-the-other-day
+Let’s go back into the times when we had no language to communicate. The only
+way we had was sign language. That’s how we usually communicate with our dog at
+home, r" />
+    <meta name="twitter:url" content="https://www.freecodecamp.org/news/an-introduction-to-part-of-speech-tagging-and-the-hidden-markov-model-953d45338f24/" />
+    <meta name="twitter:image" content="https://cdn-media-1.freecodecamp.org/images/1*f6e0uf5PX17pTceYU4rbCA.jpeg" />
+    <meta name="twitter:label1" content="Written by" />
+    <meta name="twitter:data1" content="freeCodeCamp.org" />
+    <meta name="twitter:label2" content="Filed under" />
+    <meta name="twitter:data2" content="Machine Learning, Technology, Tech, Algorithms, Programming" />
+    <meta name="twitter:site" content="@freecodecamp" />
+    <meta property="og:image:width" content="800" />
+    <meta property="og:image:height" content="453" />
+    
+    <script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "publisher": {
+        "@type": "Organization",
+        "name": "freeCodeCamp.org",
+        "logo": {
+            "@type": "ImageObject",
+            "url": "https://www.freecodecamp.org/news/content/images/2019/11/fcc_primary_large_24X210.svg",
+            "width": 210,
+            "height": 24
+        }
+    },
+    "author": {
+        "@type": "Person",
+        "name": "freeCodeCamp.org",
+        "image": {
+            "@type": "ImageObject",
+            "url": "//www.gravatar.com/avatar/fcda43852608626fe46d7fd43145766e?s=250&d=mm&r=x",
+            "width": 250,
+            "height": 250
+        },
+        "url": "https://www.freecodecamp.org/news/author/freecodecamp/",
+        "sameAs": []
+    },
+    "headline": "An introduction to part-of-speech tagging and the Hidden Markov Model",
+    "url": "https://www.freecodecamp.org/news/an-introduction-to-part-of-speech-tagging-and-the-hidden-markov-model-953d45338f24/",
+    "datePublished": "2018-06-08T19:31:14.000Z",
+    "dateModified": "2018-03-23T02:37:43.000Z",
+    "image": {
+        "@type": "ImageObject",
+        "url": "https://cdn-media-1.freecodecamp.org/images/1*f6e0uf5PX17pTceYU4rbCA.jpeg",
+        "width": 800,
+        "height": 453
+    },
+    "keywords": "Machine Learning, Technology, Tech, Algorithms, Programming",
+    "description": "by Divya Godayal\n\nAn introduction to part-of-speech tagging and the Hidden Markov Model\nby Sachin Malhotra [https://medium.com/@sachinmalhotra]  and Divya Godayal\n[https://medium.com/@divyagodayal]\n\nSource: \nhttps://english.stackexchange.com/questions/218058/parts-of-speech-and-functions-bob-made-a-book-collector-happy-the-other-day\nLet’s go back into the times when we had no language to communicate. The only\nway we had was sign language. That’s how we usually communicate with our dog at\nhome, r",
+    "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://www.freecodecamp.org/news/"
+    }
+}
+    </script>
+
+    <meta name="generator" content="Ghost 2.25" />
+    <link rel="alternate" type="application/rss+xml" title="freeCodeCamp.org" href="https://www.freecodecamp.org/news/rss/" />
+    <script>
+  // Set up dataLayer with data if provided
+  window.dataLayer = window.dataLayer || [{ gaPropertyId: 'UA-55446531-20' }];
+
+  // Initialized GTM via gtag
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'UA-55446531-20');
+
+  // Configure and initialize GTM
+  (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+  'https://www.googletagmanager.com/gtm.js?id='+i+dl+'&gtm_cookies_win=x';f.parentNode.insertBefore(j,f);
+  })(window,document,'script','dataLayer', 'GTM-5D6RKKP');
+</script>
+
+<script>
+// For Runkit embeds
+document.addEventListener('DOMContentLoaded', function() {
+  (function() {
+    const runkitElements = document.querySelectorAll('.runkit-element');
+	  runkitElements.forEach(function(element) {
+      const source = element.innerHTML.replace(/&amp;/g, '&');
+      element.innerHTML = '';
+      RunKit.createNotebook({element, source});
+	  });
+  })();
+});
+</script>
+
+</head>
+
+<body class="post-template tag-machine-learning tag-technology tag-tech tag-algorithms tag-programming">
+
+    <div class="site-wrapper">
+        <nav class="site-nav nav-padding">
+    <div class="site-nav-left">
+        <form onsubmit="submitSearch()">
+  <div role="search" class="searchbox__wrapper">
+    <input type="search" placeholder="Search 5,000+ tutorials" id="search-input" />
+    <button type="submit" title="Submit your search query." class="ais-SearchBox-submit">
+      <svg class="ais-SearchBox-submitIcon" xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 40 40">
+        <path d="M26.804 29.01c-2.832 2.34-6.465 3.746-10.426 3.746C7.333 32.756 0 25.424 0 16.378 0 7.333 7.333 0 16.378 0c9.046 0 16.378 7.333 16.378 16.378 0 3.96-1.406 7.594-3.746 10.426l10.534 10.534c.607.607.61 1.59-.004 2.202-.61.61-1.597.61-2.202.004L26.804 29.01zm-10.426.627c7.323 0 13.26-5.936 13.26-13.26 0-7.32-5.937-13.257-13.26-13.257C9.056 3.12 3.12 9.056 3.12 16.378c0 7.323 5.936 13.26 13.258 13.26z" />
+      </svg>
+    </button>
+  </div>
+</form>
+
+<script>
+  const client = algoliasearch('QMJYL5WYTI', '4318af87aa3ce128708f1153556c6108');
+  const index = client.initIndex('news');
+  const screenWidth = window.screen.width;
+  const screenHeight = window.screen.height;
+  const hitsToRender = (screenWidth >= 767 && screenHeight >= 768) ? 8 : 5;
+  autocomplete('#search-input', { hint: false, debug: true }, [
+    {
+      source: autocomplete.sources.hits(index, { hitsPerPage: hitsToRender }),
+      debounce: 250,
+      templates: {
+        suggestion: (suggestion, result) => {
+          return `
+            <a href="${suggestion.url}">
+              <div class="algolia-result">
+                <span>${suggestion._highlightResult.title.value}</span>
+              </div>
+            </a>
+          `;
+        },
+        empty: (options) => {
+          return `
+            <div class="algolia-result">
+              No tutorials found
+            </div>
+          `;
+        },
+        footer: (query, result) => {
+          if (!query.isEmpty) {
+            return `
+              <hr/>
+              <a id="algolia-footer-selector" href="https://freecodecamp.org/news/search?query=${result.query}">
+                <div class="algolia-result algolia-footer">
+                  <span>See all results for ${result.query}</span>
+                </div>
+              </a>
+            `;
+          }
+        }
+      }
+    }
+  ]).on('autocomplete:selected', (event, suggestion, dataset, context) => {
+    // Set to hit URL if hit is selected by mouse click or enter key
+    hitSelected = suggestion.url;
+    // Do nothing on click, as the browser will already do it
+    if (context.selectionMethod === 'click') {
+      return;
+    }
+    // Change the page, for example, on other events
+    window.location.assign(suggestion.url);
+  });
+
+  // If no hits in the Autocomplete dropdown are highlighted,
+  // treat input like normal search bar
+  const input = document.getElementById('search-input');
+  let searchQuery, hitSelected;
+
+  // Get the value of the search bar after each key event
+  input.addEventListener('input', e => {
+    searchQuery = input.value;
+  });
+
+  input.addEventListener('keydown', e => {
+    if (event.key === 'Enter' && !hitSelected && searchQuery) {
+      window.location.assign(`https://freecodecamp.org/news/search?query=${searchQuery}`);
+    }
+  });
+
+  function submitSearch() {
+    event.preventDefault();
+    // Search for highlighted hit when search button
+    // is pressed to prevent redirecting to a previously
+    // highlighted one
+    hitSelected = document.getElementsByClassName('aa-cursor')[0];
+
+    if (hitSelected && searchQuery) {
+      const articleUrl = hitSelected.querySelector('a').href;
+      window.location.assign(articleUrl);
+    } else if (!hitSelected && searchQuery) {
+      window.location.assign(`https://freecodecamp.org/news/search?query=${searchQuery}`);
+    }
+  }
+</script>
+    </div>
+    <div class="site-nav-middle">
+        <a class="site-nav-logo" href="https://www.freecodecamp.org/news"><img src="/news/content/images/2019/11/fcc_primary_large_24X210.svg" alt="freeCodeCamp.org" /></a>
+    </div>
+    <div class="site-nav-right main-nav">
+        <div class="main-nav-group">
+            <ul class="nav" role="menu">
+    <li class="nav-news" role="menuitem"><a href="https://www.freecodecamp.org/news/">/news</a></li>
+    <li class="nav-forum" role="menuitem"><a href="https://www.freecodecamp.org/forum/">/forum</a></li>
+    <li class="nav-learn" role="menuitem"><a href="https://www.freecodecamp.org/learn/">/learn</a></li>
+</ul>
+
+        </div>
+    </div>
+    <button class="site-nav-right toggle-button-nav">
+        Menu
+    </button>
+</nav>
+
+
+        
+
+
+
+
+<main id="site-main" class="site-main outer">
+    <div class="inner">
+
+        <article class="post-full post tag-machine-learning tag-technology tag-tech tag-algorithms tag-programming ">
+
+            <header class="post-full-header">
+                <section class="post-full-meta">
+                    <time class="post-full-meta-date"
+                        datetime="2018-06-08">8 June 2018</time>
+                    <span class="date-divider">/</span>
+                    <a href="/news/tag/machine-learning/">
+                        #Machine Learning
+                    </a>
+                </section>
+                <h1 class="post-full-title">An introduction to part-of-speech tagging and the Hidden Markov Model</h1>
+            </header>
+
+            <div class="post-full-author-header">
+
+
+            </div>
+
+            <figure class="post-full-image">
+                <img srcset="https://cdn-media-1.freecodecamp.org/images/1*f6e0uf5PX17pTceYU4rbCA.jpeg 300w,
+                            https://cdn-media-1.freecodecamp.org/images/1*f6e0uf5PX17pTceYU4rbCA.jpeg 600w,
+                            https://cdn-media-1.freecodecamp.org/images/1*f6e0uf5PX17pTceYU4rbCA.jpeg 1000w,
+                            https://cdn-media-1.freecodecamp.org/images/1*f6e0uf5PX17pTceYU4rbCA.jpeg 2000w" sizes="(max-width: 800px) 400px,
+                            (max-width: 1170px) 700px,
+                            1400px" src="https://cdn-media-1.freecodecamp.org/images/1*f6e0uf5PX17pTceYU4rbCA.jpeg" alt="An introduction to part-of-speech tagging and the Hidden Markov Model"
+                    onerror="this.style.display='none'" />
+            </figure>
+
+            <section class=" post-full-content">
+                <div class="post-content medium-migrated-article">
+                    <p>by Divya Godayal</p><h1 id="an-introduction-to-part-of-speech-tagging-and-the-hidden-markov-model">An introduction to part-of-speech tagging and the Hidden Markov Model</h1><p><em>by <a href="https://medium.com/@sachinmalhotra" rel="noopener">Sachin Malhotra</a> and <a href="https://medium.com/@divyagodayal" rel="noopener">Divya Godayal</a></em></p><!--kg-card-begin: image--><figure class="kg-card kg-image-card kg-card-hascaption"><img src="https://cdn-media-1.freecodecamp.org/images/1*f6e0uf5PX17pTceYU4rbCA.jpeg" class="kg-image"><figcaption>Source: <a href="https://english.stackexchange.com/questions/218058/parts-of-speech-and-functions-bob-made-a-book-collector-happy-the-other-day" rel="noopener" target="_blank" title="">https://english.stackexchange.com/questions/218058/parts-of-speech-and-functions-bob-made-a-book-collector-happy-the-other-day</a></figcaption></figure><!--kg-card-end: image--><p>Let’s go back into the times when we had no language to communicate. The only way we had was sign language. That’s how we usually communicate with our dog at home, right? When we tell him, “We love you, Jimmy,” he responds by wagging his tail. This doesn’t mean he knows what we are actually saying. Instead, his response is simply because he understands the language of emotions and gestures more than words.</p><p>We as humans have developed an understanding of a lot of nuances of the natural language more than any animal on this planet. That is why when we say “I LOVE you, honey” vs when we say “Lets make LOVE, honey” we mean different things. Since we understand the basic difference between the two phrases, our responses are very different. It is these very intricacies in natural language understanding that we want to teach to a machine.</p><p>What this could mean is when your future robot dog hears “I love you, Jimmy”, he would know LOVE is a Verb. He would also realize that it’s an emotion that we are expressing to which he would respond in a certain way. And maybe when you are telling your partner “Lets make LOVE”, the dog would just stay out of your business ?.</p><p>This is just an example of how teaching a robot to communicate in a language known to us can make things easier.</p><p>The primary use case being highlighted in this example is how important it is to understand the difference in the usage of the word LOVE, in different contexts.</p><h3 id="part-of-speech-tagging">Part-of-Speech Tagging</h3><p>From a very small age, we have been made accustomed to identifying part of speech tags. For example, reading a sentence and being able to identify what words act as nouns, pronouns, verbs, adverbs, and so on. All these are referred to as the part of speech tags.</p><p>Let’s look at the Wikipedia definition for them:</p><blockquote>In corpus linguistics, <strong>part-of-speech tagging</strong> (<strong>POS tagging</strong> or <strong>PoS tagging</strong> or <strong>POST</strong>), also called <strong>grammatical tagging</strong> or <strong>word-category disambiguation</strong>, is the process of marking up a word in a text (corpus) as corresponding to a particular part of speech, based on both its definition and its context — i.e., its relationship with adjacent and related words in a phrase, sentence, or paragraph. A simplified form of this is commonly taught to school-age children, in the identification of words as nouns, verbs, adjectives, adverbs, etc.</blockquote><p>Identifying part of speech tags is much more complicated than simply mapping words to their part of speech tags. This is because POS tagging is not something that is generic. It is quite possible for a single word to have a different part of speech tag in different sentences based on different contexts. That is why it is impossible to have a generic mapping for POS tags.</p><p>As you can see, it is not possible to manually find out different part-of-speech tags for a given corpus. New types of contexts and new words keep coming up in dictionaries in various languages, and manual POS tagging is not scalable in itself. That is why we rely on machine-based POS tagging.</p><p>Before proceeding further and looking at how part-of-speech tagging is done, we should look at why POS tagging is necessary and where it can be used.</p><h3 id="why-part-of-speech-tagging">Why Part-of-Speech tagging?</h3><p>Part-of-Speech tagging in itself may not be the solution to any particular NLP problem. It is however something that is done as a pre-requisite to simplify a lot of different problems. Let us consider a few applications of POS tagging in various NLP tasks.</p><h4 id="text-to-speech-conversion">Text to Speech Conversion</h4><p>Let us look at the following sentence:</p><!--kg-card-begin: code--><pre><code>They refuse to permit us to obtain the refuse permit.</code></pre><!--kg-card-end: code--><p>The word <code>refuse</code> is being used twice in this sentence and has two different meanings here. <em>refUSE (/</em>rəˈfyo͞oz/)is a verb meaning “deny,” while <em>REFuse(/</em>ˈrefˌyo͞os/) is a noun meaning “trash” (that is, they are not homophones). Thus, we need to know which word is being used in order to pronounce the text correctly. (For this reason, text-to-speech systems usually perform POS-tagging.)</p><p>Have a look at the part-of-speech tags generated for this very sentence by the <a href="https://www.nltk.org/" rel="noopener">NLTK</a> package.</p><!--kg-card-begin: code--><pre><code>&gt;&gt;&gt; text = word_tokenize("They refuse to permit us to obtain the refuse permit")&gt;&gt;&gt; nltk.pos_tag(text)[('They', 'PRP'), ('refuse', 'VBP'), ('to', 'TO'), ('permit', 'VB'), ('us', 'PRP'),('to', 'TO'), ('obtain', 'VB'), ('the', 'DT'), ('refuse', 'NN'), ('permit', 'NN')]</code></pre><!--kg-card-end: code--><p>As we can see from the results provided by the NLTK package, POS tags for both <em>refUSE and REFuse </em>are different. Using these two different POS tags for our text to speech converter can come up with a different set of sounds.</p><p>Similarly, let us look at yet another classical application of POS tagging: word sense disambiguation.</p><h4 id="word-sense-disambiguation">Word Sense Disambiguation</h4><p>Let’s talk about this kid called Peter. Since his mother is a neurological scientist, she didn’t send him to school. His life was devoid of science and math.</p><p>One day she conducted an experiment, and made him sit for a math class. Even though he didn’t have any prior subject knowledge, Peter thought he aced his first test. His mother then took an example from the test and published it as below. (Kudos to her!)</p><!--kg-card-begin: image--><figure class="kg-card kg-image-card kg-card-hascaption"><img src="https://cdn-media-1.freecodecamp.org/images/1*nHkemiTJp9FJV-wjxBlGrA.png" class="kg-image"><figcaption>Word-sense Disambiguation example — My son Peter’s first Maths problem.</figcaption></figure><!--kg-card-end: image--><p>Words often occur in different senses as different parts of speech. For example:</p><ul><li>She saw a <strong>bear.</strong></li><li>Your efforts will <strong>bear</strong> fruit.</li></ul><p>The word <strong>bear </strong>in the above sentences has completely different senses, but more importantly one is a noun and other is a verb. Rudimentary word sense disambiguation is possible if you can tag words with their POS tags.</p><p>Word-sense disambiguation (WSD) is identifying which sense of a word (that is, which meaning) is used in a sentence, when the word has multiple meanings.</p><p>Try to think of the multiple meanings for this sentence:</p><p><strong>Time flies like an arrow</strong></p><p>Here are the various interpretations of the given sentence. The meaning and hence the part-of-speech might vary for each word.</p><!--kg-card-begin: image--><figure class="kg-card kg-image-card kg-card-hascaption"><img src="https://cdn-media-1.freecodecamp.org/images/1*rOL82uvp5WPXtlhnFZEHKA.jpeg" class="kg-image"><figcaption>Part-of-speech tags define the meaning of a sentence based on the context</figcaption></figure><!--kg-card-end: image--><p>As we can clearly see, there are multiple interpretations possible for the given sentence. Different interpretations yield different kinds of part of speech tags for the words.This information, if available to us, can help us find out the exact version / interpretation of the sentence and then we can proceed from there.</p><p>The above example shows us that a single sentence can have three different POS tag sequences assigned to it that are equally likely. That means that it is very important to know what specific meaning is being conveyed by the given sentence whenever it’s appearing. <strong>This is word sense disambiguation, as we are trying to find out THE sequence.</strong></p><p>These are just two of the numerous applications where we would require POS tagging. There are other applications as well which require POS tagging, like Question Answering, Speech Recognition, Machine Translation, and so on.</p><p>Now that we have a basic knowledge of different applications of POS tagging, let us look at how we can go about actually assigning POS tags to all the words in our corpus.</p><h3 id="types-of-pos-taggers">Types of POS taggers</h3><p>POS-tagging algorithms fall into two distinctive groups:</p><ul><li><strong>Rule-Based POS Taggers</strong></li><li><strong>Stochastic POS Taggers</strong></li></ul><p><a href="https://en.wikipedia.org/wiki/Brill_tagger" rel="noopener">E. Brill’s tagger</a>, one of the first and most widely used English POS-taggers, employs rule-based algorithms. Let us first look at a very brief overview of what rule-based tagging is all about.</p><h4 id="rule-based-tagging">Rule-Based Tagging</h4><p>Automatic part of speech tagging is an area of natural language processing where statistical techniques have been more successful than rule-based methods.</p><p>Typical rule-based approaches use contextual information to assign tags to unknown or ambiguous words. Disambiguation is done by analyzing the linguistic features of the word, its preceding word, its following word, and other aspects.</p><p>For example, if the preceding word is an article, then the word in question must be a noun. This information is coded in the form of rules.</p><p>Example of a rule:</p><blockquote>If an ambiguous/unknown word X is preceded by a determiner and followed by a noun, tag it as an adjective.</blockquote><p>Defining a set of rules manually is an extremely cumbersome process and is not scalable at all. So we need some automatic way of doing this.</p><p>The Brill’s tagger is a rule-based tagger that goes through the training data and finds out the set of tagging rules that best define the data and minimize POS tagging errors. The most important point to note here about Brill’s tagger is that the rules are not hand-crafted, but are instead found out using the corpus provided. The only feature engineering required is a <strong>set of rule templates </strong>that the model can use to come up with new features.</p><p>Let’s move ahead now and look at Stochastic POS tagging.</p><h4 id="stochastic-part-of-speech-tagging">Stochastic Part-of-Speech Tagging</h4><p>The term ‘stochastic tagger’ can refer to any number of different approaches to the problem of POS tagging. Any model which somehow incorporates frequency or probability may be properly labelled stochastic.</p><p>The simplest stochastic taggers disambiguate words based solely on the probability that a word occurs with a particular tag. In other words, the tag encountered most frequently in the training set with the word is the one assigned to an ambiguous instance of that word. The problem with this approach is that while it may yield a valid tag for a given word, it can also yield inadmissible sequences of tags.</p><p>An alternative to the word frequency approach is to calculate the probability of a given sequence of tags occurring. This is sometimes referred to as the <em>n-gram</em> approach, referring to the fact that the best tag for a given word is determined by the probability that it occurs with the n previous tags. This approach makes much more sense than the one defined before, because it considers the tags for individual words based on context.</p><p>The next level of complexity that can be introduced into a stochastic tagger combines the previous two approaches, using both tag sequence probabilities and word frequency measurements. This is known as the <strong>Hidden Markov Model (HMM)</strong>.</p><p>Before proceeding with what is a <strong>Hidden<em> </em></strong>Markov Model, let us first look at what is a Markov Model. That will better help understand the meaning of the term <strong>Hidden<em> </em></strong>in HMMs.</p><h4 id="markov-model">Markov Model</h4><p>Say that there are only three kinds of weather conditions, namely</p><ul><li>Rainy</li><li>Sunny</li><li>Cloudy</li></ul><p>Now, since our young friend we introduced above, Peter, is a small kid, he loves to play outside. He loves it when the weather is sunny, because all his friends come out to play in the sunny conditions.</p><p>He hates the rainy weather for obvious reasons.</p><p>Every day, his mother observe the weather in the morning (that is when he usually goes out to play) and like always, Peter comes up to her right after getting up and asks her to tell him what the weather is going to be like. Since she is a responsible parent, she want to answer that question as accurately as possible. But the only thing she has is a set of observations taken over multiple days as to how weather has been.</p><p>How does she make a prediction of the weather for today based on what the weather has been for the past N days?</p><p>Say you have a sequence. Something like this:</p><p><code>Sunny, Rainy, Cloudy, Cloudy, Sunny, Sunny, Sunny, Rainy</code></p><p>So, the weather for any give day can be in any of the three states.</p><p>Let’s say we decide to use a Markov Chain Model to solve this problem. Now using the data that we have, we can construct the following state diagram with the labelled probabilities.</p><!--kg-card-begin: image--><figure class="kg-card kg-image-card"><img src="https://cdn-media-1.freecodecamp.org/images/1*BW3GyPvHOg0zWbBb8VWaXA.png" class="kg-image"></figure><!--kg-card-end: image--><p>In order to compute the probability of today’s weather given N previous observations, we will use the Markovian Property.</p><!--kg-card-begin: image--><figure class="kg-card kg-image-card"><img src="https://cdn-media-1.freecodecamp.org/images/1*mpCRGnxgzke50mjL0loOcw.png" class="kg-image"></figure><!--kg-card-end: image--><p>Markov Chain is essentially the simplest known Markov model, that is it obeys the Markov property.</p><p>The Markov property suggests that the distribution for a random variable in the future depends solely only on its distribution in the current state, and none of the previous states have any impact on the future states.</p><p>For a much more detailed explanation of the working of Markov chains, refer to <a href="https://towardsdatascience.com/introduction-to-markov-chains-50da3645a50d" rel="noopener">this</a> link.</p><p>Also, have a look at the following example just to see how probability of the current state can be computed using the formula above, taking into account the Markovian Property.</p><!--kg-card-begin: image--><figure class="kg-card kg-image-card"><img src="https://cdn-media-1.freecodecamp.org/images/1*Gymjj1jZJHkwQXMf7rsNYw.png" class="kg-image"></figure><!--kg-card-end: image--><p>Apply the Markov property in the following example.</p><!--kg-card-begin: image--><figure class="kg-card kg-image-card"><img src="https://cdn-media-1.freecodecamp.org/images/1*FdMUaqeTj8dAsqJF2yAjQg.png" class="kg-image"></figure><!--kg-card-end: image--><p>We can clearly see that as per the Markov property, the probability of <code>tomorrow's</code> weather being Sunny depends solely on <code>today's</code> weather and not on <code>yesterday's</code> .</p><p>Let us now proceed and see what is hidden in the Hidden Markov Models.</p><h3 id="hidden-markov-model">Hidden Markov Model</h3><p>It’s the small kid Peter again, and this time he’s gonna pester his new caretaker — which is you. (Ooopsy!!)</p><p>As a caretaker, one of the most important tasks for you is to tuck Peter into bed and make sure he is sound asleep. Once you’ve tucked him in, you want to make sure he’s actually asleep and not up to some mischief.</p><p>You cannot, however, enter the room again, as that would surely wake Peter up. So all you have to decide are the noises that might come from the room. Either the room is <strong>quiet</strong> or there is <strong>noise</strong> coming from the room. These are your states.</p><p>Peter’s mother, before leaving you to this nightmare, said:</p><blockquote>May the sound be with you :)</blockquote><p>His mother has given you the following state diagram. The diagram has some states, observations, and probabilities.</p><!--kg-card-begin: image--><figure class="kg-card kg-image-card kg-card-hascaption"><img src="https://cdn-media-1.freecodecamp.org/images/0*_i4JqwAZ9DdjO5Kt." class="kg-image"><figcaption>Hello Caretaker, this might help. ~Peters mother. Have fun !</figcaption></figure><!--kg-card-end: image--><p>Note that there is no direct correlation between sound from the room and Peter being asleep.</p><p>There are two kinds of probabilities that we can see from the state diagram.</p><ul><li>One is the <strong>emission<em> </em></strong>probabilities, which represent the probabilities of making certain observations given a particular state. For example, we have <code>P(noise | awake) = 0.5</code> . This is an emission probability.</li><li>The other ones is <strong>transition<em> </em></strong>probabilities, which represent the probability of transitioning to another state given a particular state. For example, we have <code>P(asleep | awake) = 0.4</code> . This is a transition probability.</li></ul><p>The Markovian property applies in this model as well. So do not complicate things too much. Markov, your savior said:</p><blockquote>Don’t go too much into the history…</blockquote><p>The Markov property, as would be applicable to the example we have considered here, would be that the probability of Peter being in a state depends ONLY on the previous state.</p><p>But there is a clear flaw in the Markov property. If Peter has been awake for an hour, then the probability of him falling asleep is higher than if has been awake for just 5 minutes. So, history matters. Therefore, the Markov state machine-based model is not completely correct. It’s merely a simplification.</p><p>The Markov property, although wrong, makes this problem very tractable.</p><p>We usually observe longer stretches of the child being awake and being asleep. If Peter is awake now, the probability of him staying awake is higher than of him going to sleep. Hence, the 0.6 and 0.4 in the above diagram.<code>P(awake | awake) = 0.6 and P(asleep | awake) = 0.4</code></p><!--kg-card-begin: image--><figure class="kg-card kg-image-card kg-card-hascaption"><img src="https://cdn-media-1.freecodecamp.org/images/1*mJNBB5gdLR_Z6AlUKRfN6A.png" class="kg-image"><figcaption>The Transition probabilities matrix.</figcaption></figure><!--kg-card-end: image--><!--kg-card-begin: image--><figure class="kg-card kg-image-card kg-card-hascaption"><img src="https://cdn-media-1.freecodecamp.org/images/1*YkEuELs83MGtCz2v_uEVXw.png" class="kg-image"><figcaption>The Emission probabilities matrix.</figcaption></figure><!--kg-card-end: image--><p>Before actually trying to solve the problem at hand using HMMs, let’s relate this model to the task of Part of Speech Tagging.</p><h4 id="hmms-for-part-of-speech-tagging">HMMs for Part of Speech Tagging</h4><p>We know that to model any problem using a Hidden Markov Model we need a set of observations and a set of possible states. The states in an HMM are hidden.</p><p>In the part of speech tagging problem, the <strong>observations</strong> are the words themselves in the given sequence.</p><p>As for the <strong>states</strong>, which are hidden, these would be the POS tags for the words.</p><p>The <strong>transition probabilities</strong> would be somewhat like <code>P(VP | NP)</code> that is, what is the probability of the current word having a tag of Verb Phrase given that the previous tag was a Noun Phrase.</p><p><strong>Emission probabilities </strong>would be <code>P(john | NP) or P(will | VP)</code> that is, what is the probability that the word is, say, John given that the tag is a Noun Phrase.</p><p>Note that this is just an informal modeling of the problem to provide a very basic understanding of how the Part of Speech tagging problem can be modeled using an HMM.</p><h4 id="how-do-we-solve-this">How do we solve this?</h4><p>Coming back to our problem of taking care of Peter.</p><p>Irritated are we ? ?.</p><p>Our problem here was that we have an initial state: Peter was awake when you tucked him into bed. After that, you recorded a sequence of observations, namely <strong>noise </strong>or <strong>quiet,</strong> at different time-steps. Using these set of observations and the initial state, you want to find out whether Peter would be awake or asleep after say N time steps.</p><p>We draw all possible transitions starting from the initial state. There’s an exponential number of branches that come out as we keep moving forward. So the model <strong>grows exponentially</strong> after a few time steps. Even without considering any observations. Have a look at the model expanding exponentially below.</p><!--kg-card-begin: image--><figure class="kg-card kg-image-card kg-card-hascaption"><img src="https://cdn-media-1.freecodecamp.org/images/1*pOOd-g0iFsLbjBIw1Fit2w.png" class="kg-image"><figcaption>S0 is Awake and S1 is Asleep. Exponential growth through the model because of the transitions.</figcaption></figure><!--kg-card-end: image--><p>If we had a set of states, we could calculate the probability of the sequence. But we don’t have the states. All we have are a sequence of observations. This is why this model is referred to as the <strong>Hidden </strong>Markov Model — because the actual states over time are hidden.</p><p>So, caretaker, if you’ve come this far it means that you have at least a fairly good understanding of how the problem is to be structured. All that is left now is to use some algorithm / technique to actually solve the problem. For now, <strong>Congratulations on Leveling up!</strong></p><p>In the <a href="https://medium.freecodecamp.org/a-deep-dive-into-part-of-speech-tagging-using-viterbi-algorithm-17c8de32e8bc" rel="noopener">next article</a> of this two-part series, we will see how we can use a well defined algorithm known as the <strong>Viterbi Algorithm </strong>to decode the given sequence of observations given the model. See you there!</p>
+                </div>
+                <hr />
+                <p class="social-row">
+
+    If this article was helpful,
+    <a class='cta-button' onclick="window.open(`https://twitter.com/intent/tweet?text=An%20introduction%20to%20part-of-speech%20tagging%20and%20the%20Hidden%20Markov%20Model%0A%0Ahttps%3A%2F%2Fwww.freecodecamp.org%2Fnews%2Fan-introduction-to-part-of-speech-tagging-and-the-hidden-markov-model-953d45338f24%2F`, 'share-twitter', 'width=550,height=235' ); return false;">
+        tweet it.</a>
+</p>                
+<div class='learn-cta-row'>
+    <p>
+        Learn to code for free. freeCodeCamp's open source curriculum has helped more than 40,000 people get jobs as
+        developers. <a class='cta-button' href='https://www.freecodecamp.org/learn'>Get started</a>
+    </p>
+</div>            </section>
+
+
+
+        </article>
+    </div>
+</main>
+
+
+
+
+
+<aside class="read-next outer">
+    <div class="inner">
+        <div class="read-next-feed">
+            <article class="read-next-card" 
+                 style="background-image: url(/news/content/images/size/w600/2019/11/fcc_ghost_publication_cover.png)" 
+                >
+                <header class="read-next-card-header">
+                    <p class="read-next-card-header-sitetitle">Countinue reading about</p>
+                    <h3 class="read-next-card-header-title"><a href="/news/tag/machine-learning/">Machine Learning</a></h3>
+                </header>
+                <div class="read-next-card-content">
+                    <ul>
+                        <li><a href="/news/benchmarking-machine-learning-execution-speeds/">How to Benchmark Machine Learning Execution Speed</a></li>
+                        <li><a href="/news/from-high-school-english-teacher-to-software-engineer-at-a-machine-learning-company/">From high school English teacher to Software Engineer at a Machine Learning company (Podcast)</a></li>
+                        <li><a href="/news/building-a-neural-network-from-scratch/">How to build a Neural  Network from scratch</a></li>
+                    </ul>
+                </div>
+                <footer class="read-next-card-footer">
+                    <a href="/news/tag/machine-learning/">See all 225 posts
+                        →</a>
+                </footer>
+            </article>
+
+            <article
+    class="post-card post tag-ux tag-tech tag-design tag-startup tag-usability ">
+
+    <a class="post-card-image-link" href="/news/the-well-kept-secret-behind-great-ux-usability-testing-b788178a64c3/">
+        <img class="post-card-image" srcset="https://cdn-media-1.freecodecamp.org/images/0*UWxJWKKNLXR5c1cm 300w,
+                    https://cdn-media-1.freecodecamp.org/images/0*UWxJWKKNLXR5c1cm 600w,
+                    https://cdn-media-1.freecodecamp.org/images/0*UWxJWKKNLXR5c1cm 1000w,
+                    https://cdn-media-1.freecodecamp.org/images/0*UWxJWKKNLXR5c1cm 2000w" sizes="(max-width: 1000px) 400px, 700px"
+            onerror="this.style.display='none'" src="https://cdn-media-1.freecodecamp.org/images/0*UWxJWKKNLXR5c1cm" alt="The well-kept secret behind great UX: Usability Testing" />
+    </a>
+
+    <div class="post-card-content">
+
+        <div class="post-card-content-link">
+
+            <header class="post-card-header">
+                <span class="post-card-tags">
+                    <a href="/news/tag/ux/">
+                        #UX
+                    </a>
+                </span>
+                <h2 class="post-card-title">
+                    <a href="/news/the-well-kept-secret-behind-great-ux-usability-testing-b788178a64c3/">
+                        The well-kept secret behind great UX: Usability Testing
+                    </a>
+                </h2>
+            </header>
+
+        </div>
+
+
+        <footer class="post-card-meta">
+
+            <time class="meta-item-single">2 years ago</time>
+
+
+        </footer>
+
+    </div>
+
+</article>
+            <article
+    class="post-card post tag-machine-learning tag-algorithms tag-technology tag-tech tag-programming ">
+
+    <a class="post-card-image-link" href="/news/a-deep-dive-into-part-of-speech-tagging-using-viterbi-algorithm-17c8de32e8bc/">
+        <img class="post-card-image" srcset="https://cdn-media-1.freecodecamp.org/images/1*x-5ZBtUvlD78BOMuMnMAbg.png 300w,
+                    https://cdn-media-1.freecodecamp.org/images/1*x-5ZBtUvlD78BOMuMnMAbg.png 600w,
+                    https://cdn-media-1.freecodecamp.org/images/1*x-5ZBtUvlD78BOMuMnMAbg.png 1000w,
+                    https://cdn-media-1.freecodecamp.org/images/1*x-5ZBtUvlD78BOMuMnMAbg.png 2000w" sizes="(max-width: 1000px) 400px, 700px"
+            onerror="this.style.display='none'" src="https://cdn-media-1.freecodecamp.org/images/1*x-5ZBtUvlD78BOMuMnMAbg.png" alt="A deep dive into part-of-speech tagging using the Viterbi algorithm" />
+    </a>
+
+    <div class="post-card-content">
+
+        <div class="post-card-content-link">
+
+            <header class="post-card-header">
+                <span class="post-card-tags">
+                    <a href="/news/tag/machine-learning/">
+                        #Machine Learning
+                    </a>
+                </span>
+                <h2 class="post-card-title">
+                    <a href="/news/a-deep-dive-into-part-of-speech-tagging-using-viterbi-algorithm-17c8de32e8bc/">
+                        A deep dive into part-of-speech tagging using the Viterbi algorithm
+                    </a>
+                </h2>
+            </header>
+
+        </div>
+
+
+        <footer class="post-card-meta">
+
+            <time class="meta-item-single">2 years ago</time>
+
+
+        </footer>
+
+    </div>
+
+</article>
+        </div>
+    </div>
+</aside>
+
+
+
+
+        <footer class="site-footer">
+    <div class="footer-container">
+        <div class="footer-row">
+            <div class="footer-desc-col">
+                <p>freeCodeCamp is a donor-supported tax-exempt 501(c)(3) nonprofit organization (United States Federal
+                    Tax Identification Number: 82-0779546)
+                </p>
+                <p>
+                    Our mission: to help people learn to code for free. We accomplish this by creating thousands of
+                    videos, articles, and interactive coding lessons - all freely available to the public. We also have
+                    thousands of freeCodeCamp study groups around the world.
+                </p>
+                <p>
+                    Donations to freeCodeCamp go toward our education initiatives, and help pay for servers, services,
+                    and staff.
+                </p>
+                <p class="footer-donation">
+                    You can&nbsp;<a href="https://freecodecamp.org/donate" class="inline" rel="noopener noreferrer"
+                        target="_blank">make a tax-deductible donation here</a>.
+                </p>
+            </div>
+            <div class="footer-col-1 our-nonprofit">
+                <div class="col-header">Our Nonprofit</div>
+                <a href="https://www.freecodecamp.org/news/about/">About</a>
+                <a href="https://www.linkedin.com/school/free-code-camp/people/" rel="noopener noreferrer"
+                    target="_blank">Alumni Network</a>
+                <a href="https://github.com/freeCodeCamp/">Open Source</a>
+                <a href="https://www.freecodecamp.org/shop/" rel="noopener noreferrer" target="_blank">Shop</a>
+                <a href="https://www.freecodecamp.org/news/support/">Support</a>
+                <a href="https://www.freecodecamp.org/news/sponsors/">Sponsors</a>
+                <a href="https://www.freecodecamp.org/news/academic-honesty-policy/">Academic Honesty</a>
+                <a href="https://www.freecodecamp.org/news/code-of-conduct/">Code of Conduct</a>
+                <a href="https://www.freecodecamp.org/news/privacy-policy/">Privacy Policy</a>
+                <a href="https://www.freecodecamp.org/news/terms-of-service/">Terms of Service</a>
+                <a href="https://www.freecodecamp.org/news/copyright-policy/">Copyright Policy</a>
+            </div>
+            <div class="footer-col-2 trending-guides">
+                <div class="col-header">Trending Guides</div>
+                <a href="https://www.freecodecamp.org/news/2019-web-developer-roadmap/">2019 Web Developer Roadmap</a>
+                <a href="https://www.freecodecamp.org/news/best-python-tutorial/">Python Tutorial</a>
+                <a
+                    href="https://www.freecodecamp.org/news/understanding-flexbox-everything-you-need-to-know-b4013d4dc9af/">CSS
+                    Flexbox Guide</a>
+                <a href="https://www.freecodecamp.org/news/best-javascript-tutorial/">JavaScript Tutorial</a>
+                <a href="https://www.freecodecamp.org/news/python-example/">Python Example </a>
+                <a href="https://www.freecodecamp.org/news/best-html-html5-tutorial/">HTML Tutorial</a>
+                <a href="https://www.freecodecamp.org/news/linux-command-line-bash-tutorial/">Linux Command Line
+                    Guide</a>
+                <a href="https://www.freecodecamp.org/news/javascript-example/">JavaScript Example</a>
+                <a href="https://www.freecodecamp.org/news/best-git-tutorial/">Git Tutorial</a>
+                <a href="https://www.freecodecamp.org/news/best-react-javascript-tutorial/">React Tutorial</a>
+                <a href="https://www.freecodecamp.org/news/best-java-8-tutorial/">Java Tutorial</a>
+
+            </div>
+            <div class="footer-col-3">
+                <div class="col-spacer"></div>
+                <a href="https://www.freecodecamp.org/news/the-best-linux-tutorials/">Linux Tutorial</a>
+                <a href="https://www.freecodecamp.org/news/best-css-and-css3-tutorial/">CSS Tutorial</a>
+                <a href="https://www.freecodecamp.org/news/the-best-jquery-examples/">jQuery Example</a>
+                <a href="https://www.freecodecamp.org/news/best-sql-database-tutorial/">SQL Tutorial</a>
+                <a href="https://www.freecodecamp.org/news/css-example-css3/">CSS Example</a>
+                <a href="https://www.freecodecamp.org/news/react-examples-reactjs/">React Example</a>
+                <a href="https://www.freecodecamp.org/news/best-angular-tutorial-angularjs/">Angular Tutorial</a>
+                <a href="https://www.freecodecamp.org/news/the-best-bootstrap-examples/">Bootstrap Example</a>
+                <a href="https://www.freecodecamp.org/news/the-ultimate-guide-to-ssh-setting-up-ssh-keys/">How to Set Up
+                    SSH Keys</a>
+                <a href="https://www.freecodecamp.org/news/best-wordpress-tutorial/">WordPress Tutorial</a>
+                <a href="https://www.freecodecamp.org/news/the-best-php-examples/">PHP Example</a>
+
+            </div>
+        </div>
+    </div>
+</footer>
+    </div>
+
+
+    <script>
+        var images = document.querySelectorAll('.kg-gallery-image img');
+        images.forEach(function (image) {
+            var container = image.closest('.kg-gallery-image');
+            var width = image.attributes.width.value;
+            var height = image.attributes.height.value;
+            var ratio = width / height;
+            container.style.flex = ratio + ' 1 0%';
+        })
+    </script>
+
+
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"
+        integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous">
+        </script>
+    <script type="text/javascript" src="/news/assets/built/jquery.fitvids.js?v=2df5dfcc25"></script>
+
+    <script type="text/javascript" src="https://cdn.freecodecamp.org/news-assets/prism-1-16-0/prism.min.js"></script>
+    <script type="text/javascript"
+        src="https://cdn.freecodecamp.org/news-assets/prism-1-16-0/prism-unescaped-markup.min.js"></script>
+    <script type="text/javascript"
+        src="https://cdn.freecodecamp.org/news-assets/prism-1-16-0/prism-markup-templating.min.js"></script>
+    <script type="text/javascript"
+        src="https://cdn.freecodecamp.org/news-assets/prism-1-16-0/prism-bash.min.js"></script>
+    <script type="text/javascript" src="https://cdn.freecodecamp.org/news-assets/prism-1-16-0/prism-c.min.js"></script>
+    <script type="text/javascript"
+        src="https://cdn.freecodecamp.org/news-assets/prism-1-16-0/prism-clojure.min.js"></script>
+    <script type="text/javascript"
+        src="https://cdn.freecodecamp.org/news-assets/prism-1-16-0/prism-cpp.min.js"></script>
+    <script type="text/javascript"
+        src="https://cdn.freecodecamp.org/news-assets/prism-1-16-0/prism-csharp.min.js"></script>
+    <script type="text/javascript"
+        src="https://cdn.freecodecamp.org/news-assets/prism-1-16-0/prism-css.min.js"></script>
+    <script type="text/javascript"
+        src="https://cdn.freecodecamp.org/news-assets/prism-1-16-0/prism-docker.min.js"></script>
+    <script type="text/javascript"
+        src="https://cdn.freecodecamp.org/news-assets/prism-1-16-0/prism-elixir.min.js"></script>
+    <script type="text/javascript"
+        src="https://cdn.freecodecamp.org/news-assets/prism-1-16-0/prism-erlang.min.js"></script>
+    <script type="text/javascript"
+        src="https://cdn.freecodecamp.org/news-assets/prism-1-16-0/prism-git.min.js"></script>
+    <script type="text/javascript" src="https://cdn.freecodecamp.org/news-assets/prism-1-16-0/prism-go.min.js"></script>
+    <script type="text/javascript"
+        src="https://cdn.freecodecamp.org/news-assets/prism-1-16-0/prism-graphql.min.js"></script>
+    <script type="text/javascript"
+        src="https://cdn.freecodecamp.org/news-assets/prism-1-16-0/prism-haskell.min.js"></script>
+    <script type="text/javascript"
+        src="https://cdn.freecodecamp.org/news-assets/prism-1-16-0/prism-java.min.js"></script>
+    <script type="text/javascript"
+        src="https://cdn.freecodecamp.org/news-assets/prism-1-16-0/prism-javascript.min.js"></script>
+    <script type="text/javascript"
+        src="https://cdn.freecodecamp.org/news-assets/prism-1-16-0/prism-json.min.js"></script>
+    <script type="text/javascript"
+        src="https://cdn.freecodecamp.org/news-assets/prism-1-16-0/prism-jsx.min.js"></script>
+    <script type="text/javascript"
+        src="https://cdn.freecodecamp.org/news-assets/prism-1-16-0/prism-kotlin.min.js"></script>
+    <script type="text/javascript"
+        src="https://cdn.freecodecamp.org/news-assets/prism-1-16-0/prism-lua.min.js"></script>
+    <script type="text/javascript"
+        src="https://cdn.freecodecamp.org/news-assets/prism-1-16-0/prism-markup.min.js"></script>
+    <script type="text/javascript"
+        src="https://cdn.freecodecamp.org/news-assets/prism-1-16-0/prism-php.min.js"></script>
+    <script type="text/javascript"
+        src="https://cdn.freecodecamp.org/news-assets/prism-1-16-0/prism-python.min.js"></script>
+    <script type="text/javascript" src="https://cdn.freecodecamp.org/news-assets/prism-1-16-0/prism-r.min.js"></script>
+    <script type="text/javascript"
+        src="https://cdn.freecodecamp.org/news-assets/prism-1-16-0/prism-ruby.min.js"></script>
+    <script type="text/javascript"
+        src="https://cdn.freecodecamp.org/news-assets/prism-1-16-0/prism-rust.min.js"></script>
+    <script type="text/javascript"
+        src="https://cdn.freecodecamp.org/news-assets/prism-1-16-0/prism-scala.min.js"></script>
+    <script type="text/javascript"
+        src="https://cdn.freecodecamp.org/news-assets/prism-1-16-0/prism-sql.min.js"></script>
+    <script type="text/javascript"
+        src="https://cdn.freecodecamp.org/news-assets/prism-1-16-0/prism-swift.min.js"></script>
+    <script type="text/javascript"
+        src="https://cdn.freecodecamp.org/news-assets/prism-1-16-0/prism-typescript.min.js"></script>
+    <script type="text/javascript"
+        src="https://cdn.freecodecamp.org/news-assets/prism-1-16-0/prism-yaml.min.js"></script>
+
+    <script>
+    $(document).ready(function () {
+        // Start fitVids
+        var $postContent = $(".post-full-content");
+        $postContent.fitVids();
+        // End fitVids
+    });
+</script>
+
+<script>
+    $(document).ready(function () {
+        $(".toggle-button-nav").click(function () {
+            $(".nav").toggleClass("show-main-nav-items");
+            $(".site-nav").toggleClass("expand-nav");
+            $(".toggle-button-nav").toggleClass("reverse-toggle-color");
+            $(".site-nav-left").toggleClass("display-search");
+        });
+    });
+</script>
+
+
+    <!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-5D6RKKP"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"rayId":"547287f2fb65c514","version":"2019.10.2","startTime":1576686728566}'></script>
+</body>
+
+</html>
